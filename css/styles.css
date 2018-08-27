@@ -1,0 +1,871 @@
+/*!
+    Title: Dev Portfolio Template
+    Version: 1.2.1
+    Last Change: 08/28/2017
+    Author: Ryan Fitzgerald
+    Repo: https://github.com/RyanFitzgerald/devportfolio-template
+    Issues: https://github.com/RyanFitzgerald/devportfolio-template/issues
+
+    Description: This file contains all the styles associated with the page
+    that don't come from third party libraries. This file gets compiled using
+    Gulp and send to the /css folder which is then loaded on the page.
+*/
+/*
+    File Contents:
+
+        1. Variables
+        2. Mixins
+        3. Global Styles
+        4. Lead Styles
+        5. About Styles
+        6. Experience Styles
+        7. Education Styles
+        8. Project Styles
+        9. Skills Styles
+        10. Contact Styles
+        11. Optional Section Styles
+        12. Media Queries
+*/
+/*
+    ------------------------
+    ----- 1. Variables -----
+    ------------------------
+*/
+/*
+    ---------------------
+    ----- 2. Mixins -----
+    ---------------------
+*/
+/*
+    ----------------------------
+    ----- 3. Global Styles -----
+    ----------------------------
+*/
+body {
+  font-family: "Lato", sans-serif;
+  font-size: 16px;
+}
+body.active {
+  overflow: hidden;
+  z-index: -1;
+}
+
+.no-js #experience-timeline > div {
+  background: #21252d;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #c14953;
+}
+.no-js #experience-timeline > div h3 {
+  font-size: 1.5em;
+  font-weight: 300;
+  color: #1b91d6;
+  display: inline-block;
+  margin: 0;
+}
+.no-js #experience-timeline > div h4 {
+  font-size: 1.2em;
+  font-weight: 300;
+  color: #1b91d6;
+  margin: 0 0 15px 0;
+}
+.no-js #experience-timeline > div p {
+  color: #1b91d6;
+  font-size: 0.9em;
+  margin: 0;
+}
+.no-js #experience-timeline:before, .no-js #experience-timeline:after {
+  content: none;
+}
+
+@keyframes dropHeader {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 10;
+  animation-name: dropHeader;
+  animation-iteration-count: 1;
+  animation-timing-function: ease;
+  animation-duration: 0.75s;
+}
+header ul {
+  display: inline-block;
+  background: #21252d;
+  text-align: center;
+  padding: 10px;
+  margin: 0;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+header li {
+  display: inline-block;
+}
+header a {
+  display: block;
+  color: #1b91d6;
+  padding: 10px;
+}
+header a:hover {
+  color: #0A2463;
+  text-decoration: none;
+  background: #eee;
+  border-radius: 2px;
+}
+header a:focus {
+  color: #1b91d6;
+  text-decoration: none;
+}
+header.active {
+  display: block;
+}
+header.sticky {
+  position: fixed;
+  z-index: 999;
+}
+
+#menu.active {
+  display: block;
+}
+
+#mobile-menu-open {
+  display: none;
+  cursor: pointer;
+  position: fixed;
+  right: 15px;
+  top: 10px;
+  color: #1b91d6;
+  font-size: 1.5em;
+  z-index: 20;
+  padding: 0 7px;
+  border-radius: 4px;
+  background: #21252d;
+}
+
+#mobile-menu-close {
+  display: none;
+  text-align: right;
+  width: 100%;
+  background: #21252d;
+  font-size: 1.5em;
+  padding-right: 15px;
+  padding-top: 10px;
+  cursor: pointer;
+  color: #1b91d6;
+}
+#mobile-menu-close span {
+  font-size: 0.5em;
+  text-transform: uppercase;
+}
+#mobile-menu-close i {
+  vertical-align: middle;
+}
+
+footer {
+  padding: 50px 0;
+}
+
+.copyright {
+  padding-top: 20px;
+}
+.copyright p {
+  margin: 0;
+  color: #1b91d6;
+}
+
+.top {
+  text-align: center;
+}
+.top span {
+  cursor: pointer;
+  display: block;
+  margin: 15px auto 0 auto;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 3px solid #81c7ef;
+  text-align: center;
+}
+.top i {
+  color: #1b91d6;
+}
+
+.social {
+  text-align: right;
+}
+.social ul {
+  margin: 5px 0 0 0;
+  padding: 0;
+}
+.social li {
+  display: inline-block;
+  font-size: 1.25em;
+  list-style: none;
+}
+.social a {
+  display: block;
+  color: #1b91d6;
+  padding: 10px;
+}
+.social a:hover {
+  color: #1b91d6;
+}
+
+.btn-rounded-white {
+  display: inline-block;
+  color: #fff;
+  padding: 15px 25px;
+  border: 3px solid #fff;
+  border-radius: 30px;
+  transition: 0.5s ease all;
+}
+.btn-rounded-white:hover {
+  color: #1b91d6;
+  background: #fff;
+  text-decoration: none;
+}
+
+.shadow {
+   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+
+}
+
+.shadow-large {
+   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08), 0 3px 6px rgba(0, 0, 0, 0.15);
+
+}
+
+.heading {
+  position: relative;
+  display: inline-block;
+  font-size: 2em;
+  font-weight: 300;
+  margin: 0 0 30px 0;
+}
+.heading:after {
+  position: absolute;
+  content: "";
+  top: 100%;
+  height: 1px;
+  width: 50px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  background: #1b91d6;
+}
+
+.background-alt {
+  background: #21252d;
+}
+
+/*
+    --------------------------
+    ----- 4. Lead Styles -----
+    --------------------------
+*/
+#lead {
+  position: relative;
+  height: 100vh;
+  min-height: 500px;
+  max-height: 1080px;
+  background: #21252d;
+  /* background: url(../images/lead-bg.jpg); */
+  background-size: cover;
+  padding: 15px;
+  overflow: hidden;
+}
+
+#lead-content {
+  position: absolute;
+  z-index: 10;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: #1b91d6;
+  font-size: 5em;
+  font-family: 'Lato', sans-serif;
+
+}
+
+
+#lead-content h1 {
+  color: #123456;
+  font-size: 5em;
+  font-style: light;
+
+}
+#lead-content h1, #lead-content h2 {
+  margin: 0;
+}
+#lead-content h1 {
+
+
+
+}
+
+
+#lead-content h2 {
+  color: #81c7ef;
+  font-weight: 500;
+  font-size: 2.25em;
+  margin-bottom: 15px;
+}
+
+#lead-overlay {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 100%;
+    left: 100%;
+    transform: translate(-50%, -50%);
+}
+
+#lead-down {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  text-align: center;
+  z-index: 10;
+  bottom: 15px;
+  color: #fff;
+}
+#lead-down span {
+  cursor: pointer;
+  display: block;
+  margin: 0 auto;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 3px solid #81c7ef;
+  text-align: center;
+}
+#lead-down i {
+  animation: pulsate 1.5s ease;
+  animation-iteration-count: infinite;
+  padding-top: 5px;
+}
+
+@keyframes pulsate {
+  0% {
+    transform: scale(1, 1);
+  }
+  50% {
+    transform: scale(1.2, 1.2);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+/*
+    ---------------------------
+    ----- 5. About Styles -----
+    ---------------------------
+*/
+#about {
+  padding: 75px 15px;
+  border: 1px solid #c14953;
+  background: #21252d;
+}
+#about h2 {
+  color: #1b91d6;
+}
+#about p {
+  color: #1b91d6;
+  margin: 0;
+}
+
+/*
+    --------------------------------
+    ----- 6. Experience Styles -----
+    --------------------------------
+*/
+#experience {
+  padding: 50px 15px;
+  text-align: center;
+  border-bottom: 1px solid #c14953;
+
+}
+#experience h2 {
+  color: #1b91d6;
+}
+
+#experience-timeline {
+  margin: 30px auto 0 auto;
+  position: relative;
+  max-width: 1000px;
+}
+#experience-timeline:before {
+  position: absolute;
+  content: "";
+  top: 0;
+  bottom: 0;
+  left: 303px;
+  right: auto;
+  height: 100%;
+  width: 3px;
+  background: #1b91d6;
+  z-index: 0;
+}
+#experience-timeline:after {
+  position: absolute;
+  content: "";
+  width: 3px;
+  height: 40px;
+  background: #1b91d6;
+  background: linear-gradient(to bottom, #1b91d6, rgba(27, 145, 214, 0));
+  top: 100%;
+  left: 303px;
+}
+
+.vtimeline-content {
+  margin-left: 350px;
+  background: #21252d;
+  border: 1px solid #c14953;
+  padding: 15px;
+  border-radius: 3px;
+  text-align: left;
+}
+.vtimeline-content h3 {
+  font-size: 1.5em;
+  font-weight: 300;
+  color: #1b91d6;
+  display: inline-block;
+  margin: 0;
+}
+.vtimeline-content h4 {
+  font-size: 1.2em;
+  font-weight: 300;
+  color: #1b91d6;
+  margin: 0 0 15px 0;
+}
+.vtimeline-content p {
+  color: #1b91d6;
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.vtimeline-point {
+  position: relative;
+  display: block;
+  vertical-align: top;
+  margin-bottom: 30px;
+}
+
+.vtimeline-icon {
+  position: relative;
+  color: #0a2463;
+  width: 50px;
+  height: 50px;
+  background: #1b91d6;
+  border-radius: 50%;
+  float: left;
+  z-index: 99;
+  margin-left: 280px;
+}
+.vtimeline-icon i {
+  display: block;
+  font-size: 2em;
+  margin-top: 10px;
+}
+
+.vtimeline-date {
+  width: 260px;
+  text-align: right;
+  position: absolute;
+  left: 0;
+  top: 10px;
+  font-weight: 300;
+  color: #1b91d6;
+}
+
+/*
+    -------------------------------
+    ----- 7. Education Styles -----
+    -------------------------------
+*/
+#education {
+  padding: 50px 15px 20px 15px;
+  border-bottom: 1px solid #c14953;
+  text-align: center;
+  background: #21252d;
+}
+#education h2 {
+  color: #1b91d6;
+  margin-bottom: 50px;
+}
+
+.education-block {
+  max-width: 700px;
+  margin: 0 auto 30px auto;
+  padding: 15px;
+  border: 1px solid #c14953;
+  text-align: left;
+  background: #21252d;
+}
+.education-block h3 {
+  font-weight: 500;
+  float: left;
+  margin: 0;
+  color: #1b91d6;
+}
+.education-block span {
+  color: #1b91d6;
+  float: right;
+}
+.education-block h4 {
+  color: #1b91d6;
+  clear: both;
+  font-weight: 500;
+  margin: 0 0 15px 0;
+}
+.education-block p, .education-block ul {
+  margin: 0;
+  color: #1b91d6;
+  font-size: 0.9em;
+}
+.education-block ul {
+  padding: 0 0 0 15px;
+}
+
+/*
+    -------------------------------
+    ----- 8. Project Styles -----
+    -------------------------------
+*/
+#projects {
+  padding: 50px 15px;
+  border-bottom: 5px solid #c14953;
+  text-align: center;
+}
+#projects h2 {
+  color: #1b91d6;
+  margin-bottom: 50px;
+}
+
+.project {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto 30px auto;
+  overflow: hidden;
+  background: #21252d;
+  border: 1px solid #c14953;
+}
+
+.project-image {
+  float: left;
+  border: 1px solid #c14953;
+}
+
+.project-info {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 300px;
+  padding: 15px;
+}
+.project-info h3 {
+  font-size: 1.5em;
+  font-weight: 300;
+  color: #1b91d6;
+  margin: 0 0 15px 0;
+}
+.project-info p {
+  color: #1b91d6;
+  margin: 0 0 15px 0;
+  font-size: 0.9em;
+}
+
+.no-image .project-info {
+  position: relative;
+  margin: 0;
+  padding: 30px 15px;
+  transform: none;
+}
+
+#more-projects {
+  display: none;
+}
+
+/*
+    -------------------------------
+    ----- 9. Skills Styles -----
+    -------------------------------
+*/
+#skills {
+  padding: 50px 15px;
+  text-align: center;
+}
+#skills h2 {
+  color: #1b91d6;
+  margin-bottom: 50px;
+}
+#skills ul {
+  display: block;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 800px;
+}
+#skills li {
+  display: inline-block;
+  margin: 7px;
+  padding: 5px 10px;
+  color: #1b91d6;
+  background: #16191e;
+  list-style: none;
+  cursor: default;
+  font-size: 1.2em;
+}
+
+/*
+    -------------------------------
+    ----- 10. Contact Styles -----
+    -------------------------------
+*/
+#contact {
+  padding: 50px 15px;
+  background: #1b91d6;
+  text-align: center;
+}
+#contact h2 {
+  margin: 0 0 15px 0;
+  color: #fff;
+  font-weight: 500;
+}
+
+#contact-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+#contact-form input, #contact-form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: none;
+  margin-bottom: 10px;
+  background: #126392;
+  color: #fff;
+  transition: 0.5s ease all;
+}
+#contact-form input::-webkit-input-placeholder, #contact-form textarea::-webkit-input-placeholder {
+  color: #fff;
+}
+#contact-form input:-moz-placeholder, #contact-form textarea:-moz-placeholder {
+  color: #fff;
+  opacity: 1;
+}
+#contact-form input::-moz-placeholder, #contact-form textarea::-moz-placeholder {
+  color: #fff;
+  opacity: 1;
+}
+#contact-form input:-ms-input-placeholder, #contact-form textarea:-ms-input-placeholder {
+  color: #fff;
+}
+#contact-form input:focus, #contact-form textarea:focus {
+  outline: none;
+  background: #0d4465;
+}
+#contact-form textarea {
+  height: 150px;
+  resize: none;
+}
+#contact-form button {
+  display: block;
+  width: 100%;
+  background: #fff;
+  border-radius: 4px;
+  padding: 5px 10px;
+  border: none;
+  color: #1b91d6;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: 0.5s ease all;
+}
+#contact-form button:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+
+/*
+    ---------------------------------------
+    ----- 11. Optional Section Styles -----
+    ---------------------------------------
+*/
+.optional-section {
+  padding: 50px 15px;
+  text-align: center;
+  border-top: 1px solid #c14953;
+}
+.optional-section h2 {
+  color: #1b91d6;
+}
+
+.optional-section-block {
+  max-width: 700px;
+  margin: 0 auto 30px auto;
+  padding: 15px;
+  border: 1px solid #c14953;
+  background: #fff;
+  text-align: left;
+}
+.optional-section-block h3 {
+  font-weight: 500;
+  margin: 0 0 15px 0;
+  color: #1b91d6;
+}
+.optional-section-block h4 {
+  color: #1b91d6;
+  clear: both;
+  font-weight: 500;
+  margin: 0 0 15px 0;
+}
+.optional-section-block p, .optional-section-block ul {
+  margin: 0 0 15px 0;
+  color: #1b91d6;
+  font-size: 0.9em;
+}
+.optional-section-block ul {
+  padding: 0 0 0 15px;
+}
+
+/*
+    -----------------------------
+    ----- 12. Media Queries -----
+    -----------------------------
+*/
+@media only screen and (max-width: 750px) {
+  #experience-timeline:before, #experience-timeline:after {
+    left: 23px;
+  }
+
+  .vtimeline-date {
+    width: auto;
+    text-align: left;
+    position: relative;
+    margin-bottom: 15px;
+    display: block;
+    margin-left: 70px;
+  }
+
+  .vtimeline-icon {
+    margin-left: 0;
+  }
+
+  .vtimeline-content {
+    margin-left: 70px;
+  }
+}
+@media only screen and (max-width: 992px) {
+  #lead {
+    height: auto;
+    min-height: auto;
+    max-height: auto;
+    padding: 100px 15px;
+  }
+
+  #lead-content {
+    position: relative;
+    transform: none;
+    left: auto;
+    top: auto;
+  }
+  #lead-content h1 {
+    font-size: 3em;
+  }
+  #lead-content h2 {
+    font-size: 1.75em;
+  }
+
+  #about {
+    text-align: center;
+  }
+  #about p {
+    text-align: left;
+  }
+}
+@media only screen and (max-width: 768px) {
+  header {
+    position: fixed;
+    display: none;
+    z-index: 999;
+    animation: none;
+    bottom: 0;
+    height: 100%;
+  }
+
+  #mobile-menu-open, #mobile-menu-close {
+    display: block;
+  }
+
+  #menu {
+    height: 100%;
+    overflow-y: auto;
+    box-shadow: none;
+    border-radius: 0;
+    width: 100%;
+  }
+  #menu li {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  #lead-content h1 {
+    font-size: 2em;
+  }
+  #lead-content h2 {
+    font-size: 1.3em;
+  }
+  #lead-content a {
+    padding: 10px 20px;
+  }
+
+  #lead-down {
+    display: none;
+  }
+
+  .education-block h3, .education-block span {
+    float: none;
+  }
+
+  .project-image {
+    display: none;
+  }
+
+  .project-info {
+    position: relative;
+    margin: 0;
+    padding: 30px 15px;
+    top: auto;
+    transform: none;
+  }
+
+  footer {
+    text-align: center;
+  }
+
+  .social {
+    text-align: center;
+  }
+}
+@media only screen and (max-width: 480px) {
+  #lead-content h1 {
+    font-size: 1.5em;
+  }
+  #lead-content h2 {
+    font-size: 1em;
+  }
+  #lead-content a {
+    font-size: 0.9em;
+    padding: 5px 10px;
+  }
+}
