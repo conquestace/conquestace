@@ -16,11 +16,15 @@
     -moz-user-focus:none!important;
 }
 body, html {
-    background:#1b1b1b;
+    background:#21252d;
     height:100%;
     min-height:100%;
     margin:0;
     padding:0;
+    font-family: "Lato", sans-serif;
+    font-size: 16px;
+    color:#1b91d6;
+    text-align:center;
 }
 button, input {
     -moz-transition:all .3s ease;
@@ -33,9 +37,9 @@ button, input {
     position:relative;
 }
 #panel {
-    background:#222;
-    border-top:1px solid #0b0b0b;
-    border-bottom:1px solid #0b0b0b;
+    background:#000022;
+    border-top:1px solid #0a2463;
+    border-bottom:1px solid #0a2463;
     position:absolute;
     top:0;
     bottom:0;
@@ -93,7 +97,7 @@ button, input {
     width:692px;
 }
 #sites {
-    background:#222;
+    background:#000022;
     height:230px;
     padding:5px 10px;
     position:relative;
@@ -101,9 +105,9 @@ button, input {
     z-index:1;
 }
 #sites a {
-    background:#161616;
-    border:1px solid #0b0b0b;
-    color:#8f5b5b;
+    background:#21252d;
+    border:1px solid #004fff;
+    color:#1b91d6;
     display:inline-block;
     font-family:'Squada One';
     font-size:300%;
@@ -120,4 +124,7 @@ button, input {
 }
 #sites a:hover, #sites a:active {
     color:#cf7275;
+}
+#header {
+
 }
