@@ -172,6 +172,7 @@ header.sticky {
 
 footer {
   padding: 50px 0;
+  
 }
 
 .copyright {
@@ -547,6 +548,7 @@ footer {
   padding: 50px 15px;
   border-bottom: 5px solid #c14953;
   text-align: center;
+    color: #1b91d6;
 }
 #projects h2 {
   color: #1b91d6;
@@ -605,6 +607,7 @@ footer {
 #skills {
   padding: 50px 15px;
   text-align: center;
+    background: #21252d;
 }
 #skills h2 {
   color: #1b91d6;
