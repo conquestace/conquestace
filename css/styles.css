@@ -54,7 +54,7 @@ body.active {
   background: #21252d;
   padding: 10px;
   margin-bottom: 10px;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
 }
 .no-js #experience-timeline > div h3 {
   font-size: 1.5em;
@@ -172,7 +172,6 @@ header.sticky {
 
 footer {
   padding: 50px 0;
-  
 }
 
 .copyright {
@@ -375,7 +374,7 @@ footer {
 */
 #about {
   padding: 75px 15px;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
   background: #21252d;
 }
 #about h2 {
@@ -394,7 +393,7 @@ footer {
 #experience {
   padding: 50px 15px;
   text-align: center;
-  border-bottom: 1px solid #c14953;
+  border-bottom: 1px solid #2274a5;
 
 }
 #experience h2 {
@@ -432,7 +431,7 @@ footer {
 .vtimeline-content {
   margin-left: 350px;
   background: #21252d;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
   padding: 15px;
   border-radius: 3px;
   text-align: left;
@@ -497,7 +496,7 @@ footer {
 */
 #education {
   padding: 50px 15px 20px 15px;
-  border-bottom: 1px solid #c14953;
+  border-bottom: 1px solid #2274a5;
   text-align: center;
   background: #21252d;
 }
@@ -510,7 +509,7 @@ footer {
   max-width: 700px;
   margin: 0 auto 30px auto;
   padding: 15px;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
   text-align: left;
   background: #21252d;
 }
@@ -546,7 +545,7 @@ footer {
 */
 #projects {
   padding: 50px 15px;
-  border-bottom: 5px solid #c14953;
+  border-bottom: 5px solid #2274a5;
   text-align: center;
     color: #1b91d6;
 }
@@ -561,12 +560,12 @@ footer {
   margin: 0 auto 30px auto;
   overflow: hidden;
   background: #21252d;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
 }
 
 .project-image {
   float: left;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
 }
 
 .project-info {
@@ -707,7 +706,7 @@ footer {
 .optional-section {
   padding: 50px 15px;
   text-align: center;
-  border-top: 1px solid #c14953;
+  border-top: 1px solid #2274a5;
 }
 .optional-section h2 {
   color: #1b91d6;
@@ -717,7 +716,7 @@ footer {
   max-width: 700px;
   margin: 0 auto 30px auto;
   padding: 15px;
-  border: 1px solid #c14953;
+  border: 1px solid #2274a5;
   background: #fff;
   text-align: left;
 }
