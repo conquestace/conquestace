@@ -884,18 +884,24 @@ const commands = {
 <p><span class="thin_font">  conquest </span>
 <span class="light_font"> ace </span></div></p>
 </body>
-<script src= "https://player.twitch.tv/js/embed/v1.js"></script>
-<div id="<player div ID>"></div>
-<script type="text/javascript">
-  var options = {
-    width: <1280>,
-    height: <720>,
-    channel: "conquestace",
- 
-    // only needed if your site is also embedded on embed.example.com and othersite.example.com 
-    parent: conquestace.com
-  };
-  var player = new Twitch.Player("<player div ID>", options);
-  player.setVolume(0.5);
-</script>
+
+  <body>
+    <!-- Add a placeholder for the Twitch embed -->
+    <div id="twitch-embed"></div>
+
+    <!-- Load the Twitch embed script -->
+    <script src="https://embed.twitch.tv/embed/v1.js"></script>
+
+    <!-- Create a Twitch.Embed object that will render within the "twitch-embed" root element. -->
+    <script type="text/javascript">
+      new Twitch.Embed("twitch-embed", {
+        width: 854,
+        height: 480,
+        channel: "monstercat",
+        // only needed if your site is also embedded on embed.example.com and othersite.example.com 
+        parent: ["embed.example.com", "othersite.example.com"]
+      });
+    </script>
+  </body>
+
 </html>
