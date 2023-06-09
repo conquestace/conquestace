@@ -875,6 +875,27 @@ const commands = {
     if (args.length ==0) redirect(url)
     else redirect(buildURL(url, search, args.join(' ')))
   }
+  
+   // jellyfin
+  'jelly': (args) => {
+    const url = 'http://home.conquestace.com/jelly', search = '/';
+    if (args.length == 0) redirect(url)
+    else redirect(buildURL(url, search, args.join(' ')));
+  },
+   // diffusion
+  'diffusion': (args) => {
+    const url = 'http://diffusion.conquestace.com/', search = '/';
+    if (args.length == 0) redirect(url)
+    else redirect(buildURL(url, search, args.join(' ')));
+  }, 
+   
+   // diffusion
+  'books': (args) => {
+    const url = 'http://books.conquestace.com/', search = '/';
+    if (args.length == 0) redirect(url)
+    else redirect(buildURL(url, search, args.join(' ')));
+  }, 
+    
 }
 })() // closure
 
