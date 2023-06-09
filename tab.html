@@ -874,7 +874,7 @@ const commands = {
     const url = 'https://developer.mozilla.org', search = '/search?q=';
     if (args.length ==0) redirect(url)
     else redirect(buildURL(url, search, args.join(' ')))
-  }
+  },
   
    // jellyfin
   'jelly': (args) => {
@@ -889,7 +889,7 @@ const commands = {
     else redirect(buildURL(url, search, args.join(' ')));
   }, 
    
-   // diffusion
+   // books
   'books': (args) => {
     const url = 'http://books.conquestace.com/', search = '/';
     if (args.length == 0) redirect(url)
