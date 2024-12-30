@@ -6,7 +6,7 @@ var config =
         { "url": "https://boards.4chan.org/a/#catalog",                             "text": "/a/"  },
         { "url": "https://boards.4chan.org/g/#catalog",                             "text": "/g/"  },
         { "url": "https://boards.4chan.org/wsg/#catalog",                                      "text": "/wsg/" },
-        { "url": "https://my.trentu.ca/portal",                                          "text": "WORK"  },
+        { "url": "https://cirno.quest",                                          "text": "WORK"  },
         { "url": "http://bakabt.me/",                                               "text": "BBT"  },
         { "url": "http://anidb.net/perl-bin/animedb.pl?show=mylist&do.filter=1",    "text": "ADB"  },
         { "url": "http://www.mangaupdates.com/mylist.html",                         "text": "MU"   },
