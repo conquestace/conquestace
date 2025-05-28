@@ -1,0 +1,125 @@
+---
+---
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>ConquestAce — New Tab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@100;300;700&display=swap" rel="stylesheet" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+        background-color: #21252d;
+        color: #1b91d6;
+        font-family: 'Lato', sans-serif;
+        overflow: hidden;
+      }
+
+      #app {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        width: 100vw;
+        text-align: center;
+        z-index: 1;
+      }
+
+      #input {
+        text-align: center;
+        font-size: 42px;
+        color: inherit;
+        background: transparent;
+        border: none;
+        outline: none;
+        width: 100%;
+        max-width: 720px;
+        font-family: monospace;
+      }
+
+      #message {
+        font-size: 16px;
+        margin-top: 0px;
+      }
+
+   
+      #glitch-tiger {
+        background-image: url('/src/assets/glitchtiger.gif');
+        opacity: 0.1;
+        margin: 0px 0;
+        pointer-events: none;
+      }
+
+      .glitch-title {
+        position: relative;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1b91d6;
+        font-family: monospace;
+        text-align: center;
+        mix-blend-mode: lighten;
+        z-index: 2;
+      }
+
+      .glitch-title::before,
+      .glitch-title::after {
+        content: attr(data-glitch);
+        position: absolute;
+        left: 0;
+        width: 100%;
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .glitch-title::before {
+        color: #ff00c8;
+        animation: glitch-left 2s infinite ease-in-out;
+      }
+
+      .glitch-title::after {
+        color: #00ffff;
+        animation: glitch-right 1.5s infinite ease-in-out;
+      }
+
+      @keyframes glitch-left {
+        0%, 100% { transform: translate(0); }
+        25% { transform: translate(-2px, -1px); }
+        50% { transform: translate(1px, 2px); }
+        75% { transform: translate(-1px, 1px); }
+      }
+
+      @keyframes glitch-right {
+        0%, 100% { transform: translate(0); }
+        25% { transform: translate(2px, 1px); }
+        50% { transform: translate(-1px, -2px); }
+        75% { transform: translate(1px, -1px); }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="app">
+      <div id="clock"></div>
+      <input id="input"
+        type="text"
+        autofocus
+        autocomplete="off"
+        spellcheck="false"
+        autocapitalize="none"
+        autocorrect="off"
+        placeholder=""
+      />
+      <div id="message"></div>
+      <a href="/"><img id="glitch-tiger" src="/src/assets/glitchtiger.gif" alt="Glitch Tiger" /> </a>
+      <div class="glitch-title" data-glitch="conquestace">conquestace</div>
+    </div>
+
+
+    <!-- Link to tab logic -->
+    <script src="/src/scripts/tablogic.js" type="module"></script>
+  </body>
+</html>
