@@ -1,1 +1,96 @@
-  <img src="/src/assets/glitchtiger.gif" alt="Glitch Tiger" class="" />
+---
+---
+
+<script>
+  if (typeof window !== 'undefined') {
+    const footers = [
+      '© 2025 Project ConquestAce. All rights reserved.',
+      '© ☠ Conquest▲ce [Encrypted]',
+      '© #$!& Project_C0nquest∆ce',
+      '© 🜃🜁🜂🜄 Project ⟁ Ω Ψ Ξ',
+      '© █▓▒░░░ CONQUESTACE.RAW ░░░▒▓█',
+      '© (ノಠ益ಠ)ノ彡┻━┻ Project GlitchX',
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const footerText = document.getElementById('footer-text');
+      let i = 0;
+      setInterval(() => {
+        i = (i + 1) % footers.length;
+        footerText.textContent = footers[i];
+      }, 2500 + Math.random() * 2000);
+    });
+  }
+</script>
+
+<style>
+  .glitch-footer {
+    position: relative;
+    font-family: monospace;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .glitch-footer::before,
+  .glitch-footer::after {
+    content: attr(data-glitch);
+    position: absolute;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    opacity: 0.4;
+    mix-blend-mode: lighten;
+  }
+
+  .glitch-footer::before {
+    color: #ff00c8; /* neon pink */
+    animation: footer-glitch-left 2s infinite ease-in-out;
+  }
+
+  .glitch-footer::after {
+    color: #39ff14; /* neon green */
+    animation: footer-glitch-right 1.6s infinite ease-in-out;
+  }
+
+  @keyframes footer-glitch-left {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(-2px, -1px); }
+    40% { transform: translate(2px, 1px); }
+    60% { transform: translate(-1px, 2px); }
+    80% { transform: translate(1px, -2px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  @keyframes footer-glitch-right {
+    0% { transform: translate(0, 0); }
+    20% { transform: translate(1px, 1px); }
+    40% { transform: translate(-2px, -1px); }
+    60% { transform: translate(1px, -1px); }
+    80% { transform: translate(-1px, 2px); }
+    100% { transform: translate(0, 0); }
+  }
+</style>
+
+<footer class="bg-slatecard text-softgray py-6">
+  <div class="container mx-auto flex flex-col items-center space-y-4">
+    <a 
+      href="https://www.conquestace.com" 
+      target="_blank" 
+      rel="noopener noreferrer" 
+      class="text-lightblue hover:text-hoverblue transition-colors duration-300"
+    >
+      <img 
+        src="/src/assets/glitchtiger.gif" 
+        alt="Glitch Tiger" 
+        class="w-24 h-auto"
+      />
+    </a>
+    <p 
+      id="footer-text" 
+      class="glitch-footer text-sm text-center" 
+      data-glitch="© 2025 Project ConquestAce. All rights reserved."
+    >
+      © 2025 Project ConquestAce. All rights reserved.
+    </p>
+  </div>
+</footer>
