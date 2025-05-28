@@ -1,19 +1,92 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Footer from '../components/Footer.astro';
-import Header from '../components/Header.astro';
 ---
 
-<BaseLayout title="Project ConquestAce" description="Glitch the system. Rewrite the rules.">
-  <section class="text-center py-20">
-    <h1 class="text-5xl font-extrabold text-mathblue mb-6 tracking-tight">
-      Project ConquestAce
-    </h1>
-    <p class="text-xl text-lightblue max-w-2xl mx-auto mb-10">
-    </p>
+<BaseLayout title="Home - Project ConquestAce">
+  <script>
+    if (typeof window !== 'undefined') {
+      const titles = [
+        'CONQUESTACE',
+        'CONQ∆STACE',
+        'C0NQU3STA↯E',
+        'CON☠QUESTACE',
+        'Ξ CONQUEST Ω',
+        'CQX|#000|ACE',
+        '[PROJECT: X]',
+        '█▓▒░ CONQ ░▒▓█'
+      ];
 
-    <button class="bg-slatecard text-lightblue hover:bg-hoverblue transition-all duration-300 px-6 py-3 rounded-lg font-semibold tracking-wide">
-      Enter the Glitch
-    </button>
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        
+        const headerText = document.getElementById('glitch-home-title');
+        let i = 0;
+        setInterval(() => {
+          i = (i + 1) % titles.length;
+          // @ts-ignore
+          headerText.textContent = titles[i];
+        }, 1800 + Math.random() * 1200);
+      });
+    }
+  </script>
+
+  <style>
+    .glitch-home {
+      position: relative;
+      font-size: 2.75rem;
+      font-weight: bold;
+      color: #1b91d6;
+      font-family: monospace;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    .glitch-home::before,
+    .glitch-home::after {
+      content: attr(data-glitch);
+      position: absolute;
+      left: 0;
+      width: 100%;
+      pointer-events: none;
+      opacity: 0.5;
+      mix-blend-mode: lighten;
+    }
+
+    .glitch-home::before {
+      color: #ff00c8;
+      animation: glitch-left 1.8s infinite ease-in-out;
+    }
+
+    .glitch-home::after {
+      color: #00ffff;
+      animation: glitch-right 1.4s infinite ease-in-out;
+    }
+
+    @keyframes glitch-left {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(-2px, -1px); }
+      50% { transform: translate(1px, 2px); }
+      75% { transform: translate(-1px, 1px); }
+    }
+
+    @keyframes glitch-right {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(2px, 1px); }
+      50% { transform: translate(-1px, -2px); }
+      75% { transform: translate(1px, -1px); }
+    }
+  </style>
+
+  <h1 id="glitch-home-title" class="glitch-home" data-glitch="CONQUESTACE">
+    CONQUESTACE
+  </h1>
+
+  <section class="text-center mt-10">
+    <p class="text-lightblue text-lg max-w-xl mx-auto">
+Enter the Glitch
+    </p>
   </section>
 </BaseLayout>

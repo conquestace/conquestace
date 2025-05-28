@@ -17,6 +17,7 @@
       let i = 0;
       setInterval(() => {
         i = (i + 1) % footers.length;
+        // @ts-ignore
         footerText.textContent = footers[i];
       }, 2500 + Math.random() * 2000);
     });

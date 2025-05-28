@@ -1,0 +1,85 @@
+---
+---
+
+<script>
+  if (typeof window !== 'undefined') {
+    const sets = [
+      ['∴', '⊗', '(>_<)', 'Ξ', '???', '/\\/\\'],
+      ['Δ', '⟁', '∿', 'NULL', '{-_-}', '[o_o]'],
+      ['Ψ', 'λ', '(°□°)', '!!!', '404', '|_|'],
+      ['Ω', '∞', '§', 'end', '<^_^>', '[+++]']
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll('.chaotic-link').forEach((el, index) => {
+        let i = 0;
+        setInterval(() => {
+          i = (i + 1) % sets[index].length;
+          el.textContent = sets[index][i];
+        }, 900 + Math.random() * 500);
+      });
+    });
+  }
+</script>
+
+<style>
+  .glitch-header {
+    position: relative;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #1b91d6;
+    font-family: monospace;
+    text-transform: lowercase;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .glitch-header::before,
+  .glitch-header::after {
+    content: attr(data-glitch);
+    position: absolute;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    mix-blend-mode: lighten;
+    opacity: 0.5;
+  }
+
+  .glitch-header::before {
+    color: #ff00c8; /* neon pink */
+    animation: glitch-left 2s infinite ease-in-out;
+  }
+
+  .glitch-header::after {
+    color: #00ffff; /* neon cyan */
+    animation: glitch-right 1.5s infinite ease-in-out;
+  }
+
+  @keyframes glitch-left {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-2px, -1px); }
+    50% { transform: translate(1px, 2px); }
+    75% { transform: translate(-1px, 1px); }
+  }
+
+  @keyframes glitch-right {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(2px, 1px); }
+    50% { transform: translate(-1px, -2px); }
+    75% { transform: translate(1px, -1px); }
+  }
+</style>
+
+<header class="bg-slatecard px-6 py-6 border-b border-slategray">
+  <div class="container mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
+    <div class="glitch-header text-mathblue" data-glitch="conquestace.com" id="header-title">
+      conquestace.com
+    </div>
+    <nav class="flex mt-4 md:mt-0 gap-6 text-lightblue font-mono text-xl">
+      <a class="chaotic-link transition duration-300 hover:text-hoverblue" href="/∴">∴</a>
+      <a class="chaotic-link transition duration-300 hover:text-hoverblue" href="/Δ">Δ</a>
+      <a class="chaotic-link transition duration-300 hover:text-hoverblue" href="/Ψ">Ψ</a>
+      <a class="chaotic-link transition duration-300 hover:text-hoverblue" href="/Ω">Ω</a>
+    </nav>
+  </div>
+</header>
