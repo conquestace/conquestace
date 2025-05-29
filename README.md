@@ -16,7 +16,7 @@ I’m **Ashiful Bhuiyan** (aka **ConquestAce**). I do math and physics, develop 
 | Project | Description |
 |--------|-------------|
 | [`tab`](https://github.com/conquestace/tab) | A custom new tab launcher with glitchy visuals, clock, and command parsing. |
-| [`mathcodes.org`](https://mathcodes.org) | Landing page for math resources, coded with Astro + Tailwind. |
+| [`mathcodes.org`](https://ashiful.mathcodes.org) | Landing page for math resources, coded with Astro + Tailwind. |
 | [`numerical-analysis`](https://github.com/conquestace/numerical-analysis) | PDE solvers, math notebooks, and methods from Burden, Naylor, and Numerical Recipes. |
 | [`giftedcenter`](https://github.com/conquestace/giftedcenter) | Website for my tutoring company — built for scale, optimized for learning. |
 
