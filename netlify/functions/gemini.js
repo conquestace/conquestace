@@ -1,24 +1,44 @@
 export async function handler(event) {
-  const input = JSON.parse(event.body).input;
+  try {
+    const input = JSON.parse(event.body).input;
+    const apiKey = process.env.GEMINI_API_KEY;
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + apiKey;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        { parts: [{ text: `You are a glitchy console AI. Respond like a terminal. Q: ${input}` }] }
-      ]
-    })
-  });
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: `You are a Unix terminal AI. Respond concisely and in shell style to: "${input}"`
+              }
+            ]
+          }
+        ]
+      })
+    });
 
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[No response]";
+    const data = await response.json();
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ text })
-  };
+    console.log("Gemini raw response:", JSON.stringify(data, null, 2));
+
+    // Attempt to extract the reply
+    const text =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ??
+      "[Gemini returned no usable output]\n" + JSON.stringify(data);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ text })
+    };
+  } catch (err) {
+    console.error("Gemini handler error:", err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ text: "Error: " + err.message })
+    };
+  }
 }
