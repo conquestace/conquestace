@@ -1,0 +1,80 @@
+---
+// No props needed for now
+---
+
+<div
+  id="console-overlay"
+  class="hidden fixed inset-0 z-[9999] bg-[#000000cc] backdrop-blur-sm text-lightblue p-6"
+>
+  <div class="max-w-2xl mx-auto border border-softgray rounded-lg p-4 bg-slatecard shadow-lg h-fit">
+    <div class="text-sky mb-2 font-mono">CONSOLE MODE [ESC to exit]</div>
+
+    <div
+      id="console-log"
+      class="h-64 overflow-y-auto text-sm font-mono mb-2 space-y-1"
+    >
+      <div>
+        <span class="text-sky">hacker@conquestace.com</span>:~$
+        <span class="text-lightblue">Hello</span>
+      </div>
+      <div><span class="text-sky">sys</span>: Hello, Agent. Awaiting your next directive.</div>
+    </div>
+
+    <form id="console-form" class="flex gap-2">
+      <span class="text-sky">hacker@conquestace.com</span>:~$
+      <input
+        type="text"
+        id="console-input"
+        autocomplete="off"
+        class="flex-1 text-lightblue rounded outline-none font-mono"
+      />
+    </form>
+  </div>
+</div>
+
+<!-- GLOBAL SCRIPT -->
+<script is:global>
+  if (typeof window !== 'undefined') {
+    // Toggle overlay with Ctrl+X or close with ESC
+    document.addEventListener('keydown', (e) => {
+      const overlay = document.getElementById('console-overlay');
+      if (e.ctrlKey && e.key.toLowerCase() === 'x') {
+        overlay.classList.toggle('hidden');
+        overlay.querySelector('input')?.focus();
+      }
+      if (e.key === 'Escape') {
+        overlay.classList.add('hidden');
+      }
+    });
+
+    const form = document.getElementById('console-form');
+    const input = document.getElementById('console-input');
+    const log = document.getElementById('console-log');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const userInput = input.value.trim();
+      if (!userInput) return;
+
+      log.innerHTML += `<div><span class="text-sky">user@conquestace</span>:~$ ${userInput}</div>`;
+      input.value = '';
+      log.scrollTop = log.scrollHeight;
+
+      try {
+        const response = await fetch("/.netlify/functions/gemini", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ input: userInput })
+        });
+
+        const data = await response.json();
+        const output = data.text ?? "[no response]";
+        log.innerHTML += `<div><span class="text-sky">sys</span>: ${output}</div>`;
+        log.scrollTop = log.scrollHeight;
+      } catch (err) {
+        log.innerHTML += `<div><span class="text-sky">sys</span>: Error: ${err.message}</div>`;
+        log.scrollTop = log.scrollHeight;
+      }
+    });
+  }
+</script>

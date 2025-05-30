@@ -1,0 +1,129 @@
+  ---
+  ---
+  <script>
+    if (typeof window !== 'undefined') {
+    const titles = [
+  '[PROJECT]: CONQUEST ACE',
+  '[PR0JECT]: CONQ∆ST ACE',
+  '⧘PR0JEC7⁆: C0NQU3STA↯E',
+  '[PR☠JECT⁆: CON☠QUESTACE',
+  '[PRΞJECT]: CΞNQUEST Ω',
+  '[PRJCT]: CQX|#000|ACE',
+  '[PROJECT]: CONQUEST ♠',
+  '█▓▒░PROJECT░▒▓█: CONQ',
+  '⁅PROJECT⁆: C0nquest Ace',
+  '[PR0JECT]: ConQuest Ace',
+  '《PROJECT》: CONQUEST ace',
+  '[PROJECT]: CONQUEST♠ace',
+  '⧚PROJECT⧛: CONQUEST ♠ce',
+  '⧚PRΞJECT⧛: CQNQ♠ST ACE',
+  '⧚PROJECT⧛: CONQ•ACE',
+  '⧚PRΞJECT⧛: C0NQU3ST A.C.E.',
+  '⧘PROJECT]: K0NQUEST ACE',
+  '《PROJECT》: CONQUEST.ΔCE',
+  '⧘PR0JEC7]: CONQUEST▲CE',
+  '[PRΞJECT]: CONQUE5T A©E',
+  '⁅PROJECT⁆: ∴ CONQUESTACE ∵',
+  '[PR0JEC7]: CONQUEST_ACE',
+  '《PROJECT》: cOnQueSt AcE',
+  '[PROJECT//]: CONQUEST\\ACE',
+  '[PROJECT <<>>]: CONQUEST ACE',
+  '[PRΞJECT <>]: CØNQUEST ACE',
+  '[PROJECT ∆]: CQNQST ∆ ACE',
+  '[ /\\/\\]: CONQ /\\',
+  '[PROJECT [CONQ] {ACE}]',
+  '[PROJECT ||]: CONQUEST || ACE',
+  '{PROJECT}: CONQUEST ACE',
+  '(PROJECT): CONQUEST ACE',
+  '<PROJECT>: CONQUEST♠ACE',
+  '⟨PROJECT⟩: CONQUEST♠ACE',
+  '【PROJECT】: CONQUEST_ACE',
+  '❲PROJECT❳: CONQUEST_ACE',
+  '⎡PROJECT⎤: CONQUEST ACE',
+  '⌈PROJECT⌉: CONQUEST_ACE',
+  '《PROJECT》: CONQUEST ACE',
+  '⟦PROJECT⟧: CONQUEST ACE',
+  '⁅PROJECT⁆: CONQUEST ACE',
+  '‹PROJECT›: CONQUEST ACE',
+  '«PROJECT»: CONQUEST ACE',
+  '〈PROJECT〉: CONQUEST ACE',
+  '⧘PROJECT⧙: CONQUEST ACE',
+  '⧓PROJECT⧒: CONQUEST ACE',
+  '⦃PROJECT⦄: CONQUEST ACE',
+  '⦅PROJECT⦆: CONQUEST ACE',
+  '⧚PROJECT⧛: CONQ∆ST ACE',
+  '⸨PROJECT⸩: CONQ∆ST ACE',
+  '❴PROJECT❵: ∴ CONQUESTACE ∵',
+  '⊏PROJECT⊐: CONQUEST ACE',
+  '╭PROJECT╮: CONQUEST ACE'
+];
+
+
+      
+      document.addEventListener("DOMContentLoaded", () => {
+        
+        const headerText = document.getElementById('glitch-home-title');
+        let i = 0;
+        setInterval(() => {
+          i = (i + 1) % titles.length;
+          // @ts-ignore
+          headerText.textContent = titles[i];
+        }, 1800 + Math.random() * 1200);
+      });
+    }
+  </script>
+
+  <style>
+    .glitch-home {
+      position: relative;
+      font-size: 2.75rem;
+      font-weight: bold;
+      color: #1b91d6;
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-align: center;
+      margin-top: 3rem;
+      
+    }
+
+    .glitch-home::before,
+    .glitch-home::after {
+      content: attr(data-glitch);
+      position: absolute;
+      left: 0;
+      width: 100%;
+      pointer-events: none;
+      opacity: 0.5;
+      mix-blend-mode: lighten;
+    }
+
+    .glitch-home::before {
+      color: #ff00c8;
+      animation: glitch-left 1.8s infinite ease-in-out;
+    }
+
+    .glitch-home::after {
+      color: #00ffff;
+      animation: glitch-right 1.4s infinite ease-in-out;
+    }
+
+    @keyframes glitch-left {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(-2px, -1px); }
+      50% { transform: translate(1px, 2px); }
+      75% { transform: translate(-1px, 1px); }
+    }
+
+    @keyframes glitch-right {
+      0%, 100% { transform: translate(0); }
+      25% { transform: translate(2px, 1px); }
+      50% { transform: translate(-1px, -2px); }
+      75% { transform: translate(1px, -1px); }
+    }
+
+  </style>
+
+
+  <h1 id="glitch-home-title" class="glitch-home" data-glitch="[PROJECT]: conquest ace">[PROJECT]: conquestace
+  </h1>

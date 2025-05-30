@@ -1,0 +1,86 @@
+---
+// No props required for now
+---
+
+<section class="mt-10 max-w-2xl mx-auto bg-slatecard border border-slategray p-4 text-lightblue font-mono rounded shadow-lg">
+  <div id="inline-log" class="mb-2 space-y-1">
+    <div><span class="text-sky">conquestace@home</span>:~$ initiate link</div>
+    <div><span class="text-sky">sys</span>: Interface lock detected. Unauthorized input.</div>
+  </div>
+  <form id="inline-form" class="mt-2 flex gap-2">
+    <span class="text-sky">conquestace@home</span>:~$
+    <input
+      type="text"
+      id="inline-input"
+      autocomplete="off"
+      class="flex-1 text-lightblue outline-none font-mono"
+      placeholder=""
+    />
+  </form>
+</section>
+
+<script is:global>
+  if (typeof window !== 'undefined') {
+    const inlineForm = document.getElementById('inline-form');
+    const inlineInput = document.getElementById('inline-input');
+    const inlineLog = document.getElementById('inline-log');
+
+    const fileSystem = {
+      'mathcodes.app': 'https://mathcodes.org',
+      'ashiful.app': 'https://ashiful.conquestace.com',
+      'giftedcenter.app': 'https://giftedcenter.org',
+      'ai.ashiful.app': 'https://ashifulinstitute.com',
+      'PROJECT_README.md': 'https://github.com/conquestace/conquestace',
+      'secrets/': null  // non-clickable
+    };
+
+    inlineForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const inputText = inlineInput.value.trim();
+      if (!inputText) return;
+
+      const cmd = inputText.toLowerCase();
+      inlineLog.innerHTML += `<div><span class="text-sky">conquestace@home</span>:~$ ${inputText}</div>`;
+      inlineInput.value = '';
+
+      if (cmd === 'clear') {
+        inlineLog.innerHTML = '';
+        return;
+      }
+
+      if (cmd === 'ls') {
+        let output = '<div><span class="text-sky">sys</span>: ';
+        for (const name in fileSystem) {
+          const isFolder = name.endsWith('/');
+          const href = fileSystem[name];
+          if (href) {
+            output += `<a href="${href}" target="_blank" class="terminal-file terminal-link">${name}</a>  `;
+          } else {
+            output += `<span class="terminal-folder">${name}</span>  `;
+          }
+        }
+        output += '</div>';
+        inlineLog.innerHTML += output;
+      } else if (cmd.startsWith('cd ')) {
+        const folder = cmd.slice(3).trim();
+        if (folder === 'secrets' || folder === 'secrets/') {
+          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Permission denied. [secrets] is classified.</div>`;
+        } else {
+          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: cd: ${folder}: No such directory</div>`;
+        }
+      } else if (fileSystem.hasOwnProperty(cmd)) {
+        const link = fileSystem[cmd];
+        if (link) {
+          window.open(link, '_blank');
+          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Opening ${cmd}...</div>`;
+        } else {
+          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: ${cmd} is a directory. Use <code>cd</code> instead.</div>`;
+        }
+      } else {
+        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Unknown command or file. Try <code>ls</code> or press Ctrl+X.</div>`;
+      }
+
+      inlineLog.scrollTop = inlineLog.scrollHeight;
+    });
+  }
+</script>
