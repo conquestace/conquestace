@@ -36,3 +36,5 @@ pnpm-debug.log*
 # Optional: OS-specific or editor-specific
 *.log
 *.tgz
+
+.secret
