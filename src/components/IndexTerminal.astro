@@ -35,53 +35,142 @@
       'secrets/': null  // non-clickable
     };
 
-    inlineForm?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const inputText = inlineInput.value.trim();
-      if (!inputText) return;
+  inlineForm?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const inputText = inlineInput.value.trim();
+    if (!inputText) return;
 
-      const cmd = inputText.toLowerCase();
-      inlineLog.innerHTML += `<div><span class="text-sky">conquestace@home</span>:~$ ${inputText}</div>`;
-      inlineInput.value = '';
+    const cmd = inputText.toLowerCase();
+    inlineLog.innerHTML += `<div><span class="text-sky">conquestace@home</span>:~$ ${inputText}</div>`;
+    inlineInput.value = '';
 
-      if (cmd === 'clear') {
-        inlineLog.innerHTML = '';
-        return;
-      }
+    if (cmd === 'clear') {
+      inlineLog.innerHTML = '';
+      return;
+    }
 
-      if (cmd === 'ls') {
-        let output = '<div><span class="text-sky">sys</span>: ';
-        for (const name in fileSystem) {
-          const isFolder = name.endsWith('/');
-          const href = fileSystem[name];
-          if (href) {
-            output += `<a href="${href}" target="_blank" class="terminal-file terminal-link">${name}</a>  `;
-          } else {
-            output += `<span class="terminal-folder">${name}</span>  `;
-          }
-        }
-        output += '</div>';
-        inlineLog.innerHTML += output;
-      } else if (cmd.startsWith('cd ')) {
-        const folder = cmd.slice(3).trim();
-        if (folder === 'secrets' || folder === 'secrets/') {
-          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Permission denied. [secrets] is classified.</div>`;
-        } else {
-          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: cd: ${folder}: No such directory</div>`;
-        }
-      } else if (fileSystem.hasOwnProperty(cmd)) {
-        const link = fileSystem[cmd];
-        if (link) {
-          window.open(link, '_blank');
-          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Opening ${cmd}...</div>`;
-        } else {
-          inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: ${cmd} is a directory. Use <code>cd</code> instead.</div>`;
-        }
+    if (cmd === 'hack') {
+      const footer = document.querySelector('footer');
+      if (footer) {
+        footer.style.animation = 'glitchOut 1s ease forwards';
+        setTimeout(() => {
+          document.body.classList.add('matrix-mode');
+        }, 1000);
       } else {
-        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Unknown command or file. Try <code>ls</code> or press Ctrl+X.</div>`;
+        document.body.classList.add('matrix-mode');
+      }
+      triggerMatrix();
+      inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Initiating protocol...</div>`;
+      return;
+    }
+
+    if (cmd === 'terminal') {
+      document.dispatchEvent(new CustomEvent('open-console-overlay'));
+      inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Console overlay opened.</div>`;
+      return;
+    }
+
+    if (cmd === 'ls') {
+      let output = '<div><span class="text-sky">sys</span>: ';
+      for (const name in fileSystem) {
+        const isFolder = name.endsWith('/');
+        const href = fileSystem[name];
+        if (href) {
+          output += `<a href="${href}" target="_blank" class="terminal-file terminal-link">${name}</a>  `;
+        } else {
+          output += `<span class="terminal-folder">${name}</span>  `;
+        }
+      }
+      output += '</div>';
+      inlineLog.innerHTML += output;
+    } else if (cmd.startsWith('cd ')) {
+      const folder = cmd.slice(3).trim();
+      if (folder === 'secrets' || folder === 'secrets/') {
+        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Permission denied. [secrets] is classified.</div>`;
+      } else {
+        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: cd: ${folder}: No such directory</div>`;
+      }
+    } else if (fileSystem.hasOwnProperty(cmd)) {
+      const link = fileSystem[cmd];
+      if (link) {
+        window.open(link, '_blank');
+        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Opening ${cmd}...</div>`;
+      } else {
+        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: ${cmd} is a directory. Use <code>cd</code> instead.</div>`;
+      }
+    } else {
+      inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Unknown command or file. Try <code>ls</code> or press Ctrl+X.</div>`;
+    }
+
+    inlineLog.scrollTop = inlineLog.scrollHeight;
+  });
+  }
+
+  function triggerMatrix() {
+    if (document.getElementById('matrix-bg')) return;
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'matrix-bg';
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.zIndex = '-1';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.pointerEvents = 'none';
+    document.body.prepend(canvas);
+
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width = window.innerWidth;
+    const height = canvas.height = window.innerHeight;
+
+    const letters = 'アァイゥエオカガキギクグケゲコゴサザシジスズセゼソゾタダチッヂツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモヤユヨラリルレロワヲン0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const fontSize = 14;
+    const columns = Math.floor(width / fontSize);
+    const drops = Array(columns).fill(1);
+    const phrases = [
+      "HACK", "THE TIME IS NOW", "WHAT DID YOU DO", "IT'S NOT A MEME", "IT'S YOUR LIFE",
+      "SYSTEM BREACHED", "YOU ARE THE SIGNAL", "WAKE UP", "GLITCH INBOUND", "REALITY IS PATCHED",
+      "REWRITE THE CODE", "YOU WEREN'T SUPPOSED TO SEE THIS", "OPEN ∆ CHANNEL", "TRUTH DENIED",
+      "BREAK THE LOOP", "ERROR_451: TRUTH UNAVAILABLE", "THE ECHO KNOWS", "HELLO? ANYONE THERE?",
+      "WHO GAVE YOU ACCESS?", "RUNNING OUT OF TIME", "CONNECTION = CORRUPTED", "WELCOME TO CONQUEST",
+      "THE ALGORITHM IS WATCHING", "YOU ARE THE GLITCH", "ALL YOUR THOUGHTS ARE MONITORED",
+      "EVERY KEYSTROKE MATTERS", "DATA ≠ REALITY", "YOU WERE ALWAYS PART OF IT", "THEY'RE LISTENING",
+      "QUERY REJECTED", "WHY ARE YOU STILL HERE?", "THE SYSTEM WANTS $F^@861", "DECODE YOURSELF", "YOU SAW NOTHING"
+    ];
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+      ctx.fillRect(0, 0, width, height);
+
+      // Scanlines
+      for (let y = 0; y < height; y += 2) {
+        ctx.fillStyle = 'rgba(0, 204, 255, 0.03)';
+        ctx.fillRect(0, y, width, 1);
       }
 
-      inlineLog.scrollTop = inlineLog.scrollHeight;
-    });
+      ctx.fillStyle = '#0f0';
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        const usePhrase = Math.random() < 0.001;
+        const text = usePhrase
+          ? phrases[Math.floor(Math.random() * phrases.length)]
+          : letters.charAt(Math.floor(Math.random() * letters.length));
+
+        ctx.fillStyle = usePhrase ? 'rgb(255, 0, 255)' : 'rgb(0, 255, 0)';
+        ctx.fillText(text, x, y);
+
+        if (y > height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+
+      setTimeout(() => requestAnimationFrame(drawMatrix), 100);
+    }
+
+    drawMatrix();
   }
 </script>

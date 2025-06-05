@@ -31,5 +31,84 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
+  width: 100%;
   overflow: hidden;
 }
+
+#app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100vw;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+      #input {
+        text-align: center;
+        font-size: 42px;
+        color: inherit;
+        background: transparent;
+        border: none;
+        outline: none;
+        width: 100%;
+        max-width: 720px;
+        font-family: monospace;
+      }
+
+      #message {
+        font-size: 16px;
+        margin-top: 0px;
+      }
+
+   *, *::before, *::after {
+  box-sizing: border-box;
+}
+
+      .glitch-title {
+        position: relative;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #1b91d6;
+        font-family: monospace;
+        text-align: center;
+        mix-blend-mode: lighten;
+        z-index: 2;
+      }
+
+      .glitch-title::before,
+      .glitch-title::after {
+        content: attr(data-glitch);
+        position: absolute;
+        left: 0;
+        width: 100%;
+        opacity: 0.5;
+        pointer-events: none;
+      }
+
+      .glitch-title::before {
+        color: #ff00c8;
+        animation: glitch-left 2s infinite ease-in-out;
+      }
+
+      .glitch-title::after {
+        color: #00ffff;
+        animation: glitch-right 1.5s infinite ease-in-out;
+      }
+
+      @keyframes glitch-left {
+        0%, 100% { transform: translate(0); }
+        25% { transform: translate(-2px, -1px); }
+        50% { transform: translate(1px, 2px); }
+        75% { transform: translate(-1px, 1px); }
+      }
+
+      @keyframes glitch-right {
+        0%, 100% { transform: translate(0); }
+        25% { transform: translate(2px, 1px); }
+        50% { transform: translate(-1px, -2px); }
+        75% { transform: translate(1px, -1px); }
+      }

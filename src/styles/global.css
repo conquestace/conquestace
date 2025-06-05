@@ -5,3 +5,20 @@
 .terminal-file { color: #8ee6ba; cursor: pointer; }
 .terminal-folder { color: #1b91d6; font-weight: bold; cursor: pointer; }
 .terminal-link:hover { text-decoration: underline; }
+
+
+@keyframes glitchOut {
+  0% { opacity: 1; filter: none; }
+  25% { opacity: 0.5; filter: hue-rotate(90deg); }
+  50% { opacity: 0.3; transform: translateX(-2px); }
+  75% { opacity: 0.1; transform: translateX(2px); }
+  100% { opacity: 0; filter: blur(2px); display: none; }
+}
+
+body.matrix-mode footer {
+  background-color: transparent !important;
+  opacity: 0.05;
+  pointer-events: none;
+  filter: blur(1px);
+  transition: all 0.6s ease-in-out;
+}
