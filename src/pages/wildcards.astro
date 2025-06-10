@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Wildcard Prompt Generator">
+  <h1 class="text-2xl font-mono text-lightblue mb-4">Wildcard Prompt Generator</h1>
+  <div class="space-y-4">
+    <input id="files" type="file" accept=".txt" multiple class="text-softgray" />
+    <select id="promptType" class="bg-slatecard border border-slategray text-lightblue p-2 rounded">
+      <option value="default">Default</option>
+      <option value="advanced">Advanced</option>
+    </select>
+    <button id="generate" class="bg-mathblue text-midnight px-4 py-2 rounded">Generate Prompt</button>
+    <pre id="output" class="mt-4 p-4 bg-slatecard border border-slategray text-lightblue font-mono rounded h-40 overflow-y-auto"></pre>
+  </div>
+
+  <script>
+    if (typeof window !== 'undefined') {
+      const fileInput = document.getElementById('files');
+      const btn = document.getElementById('generate');
+      const out = document.getElementById('output');
+      const typeSelect = document.getElementById('promptType');
+
+      async function readFiles() {
+        const data = {};
+        const files = fileInput.files || [];
+        for (const file of files) {
+          const text = await file.text();
+          data[file.name.replace(/\.txt$/i, '')] = text.split(/\r?\n/).filter(l => l.trim());
+        }
+        return data;
+      }
+
+      btn?.addEventListener('click', async () => {
+        out.textContent = 'Processing...';
+        const wildcards = await readFiles();
+        const res = await fetch('/api/prompt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ wildcards, promptType: typeSelect.value })
+        });
+        const data = await res.json();
+        out.textContent = data.prompt || 'No response';
+      });
+    }
+  </script>
+</BaseLayout>
