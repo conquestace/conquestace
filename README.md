@@ -13,10 +13,7 @@ The landing page of Project ConquestAce. It immediately sets the glitch‑aest
 
 - Quick‑link grid to newtab, TerminalOverlay, Wildcarder, and the blog.
 
-- Source ➜ src/pages/index.astro
-
-
-➡️ Source: [`src/pages/index.astro`](./src/pages/index.astro)
+-  Source ➜ [`src/pages/index.astro`](./src/pages/index.astro)
 ## newtab
 
 A self‑contained **custom start page** inspired by minimal command launchers (Surfraw, DuckDuckGo bangs):
@@ -43,9 +40,10 @@ A full‑screen **AI terminal interface** that responds in cryptic, hacker‑sty
 - Accepts site navigation commands (`help`, `goto /wildcarder`, etc.) and forwards unknown input to the LLM.
 - Source ➜ [`src/components/TerminalOverlay.astro`](./src/components/TerminalOverlay.astro)
 
+
 ## Wildcarder 🃏 — Prompt-Builder UI
 
-A lightweight (lol) Astro page (and supporting islands/functions) for turning **wildcard text files** into refined LLM prompts.
+A lightweight Astro-powered tool for turning **wildcard `.txt` files** into **refined, LLM-ready prompts** — built with modular UI islands, prompt saving, content moderation, and dynamic Hugging Face wildcard ingestion.
 
 ---
 
@@ -53,10 +51,11 @@ A lightweight (lol) Astro page (and supporting islands/functions) for turning **
 
 | Module                                | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WildcardLoader.astro`                | *Client-only island* that lets users<br>• **Drag-and-drop or browse** `.txt` wildcard files.<br>• **Load defaults** from our Hugging Face dataset (Danbooru / Natural-language).<br>• Cherry-pick at three levels:<br>  1️⃣ Collection (Danbooru vs NL) <br>  2️⃣ **Category pills** (e.g. `clothing`, `styles`)<br>  3️⃣ **File pills** that **wrap onto new lines** when they overflow.<br>• Remove individual files 🗑️ or **“🧹 Clear wildcards”**. <br>• Emits `wildcards-loaded` events (the working set) for downstream islands. |
-| `PromptBuilder.astro`                 | Generates an **initial prompt** by randomly sampling lines from the selected wildcard files.  Users can “🔄 Re-roll”, edit the prompt, and then broadcast it via `initial-prompt`.                                                                                                                                                                                                                                                                                                                                                      |
-| `LLMControls.astro`                   | UI for optional **extra instructions** and **system-prompt preset** (Danbooru, NL, etc.).  Sends everything to the serverless endpoint.                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `netlify/functions/generatePrompt.js` | • Per-preset **system prompts** (extensible via `SYSTEM_PRESETS`).<br>• **OpenAI Moderation** gate with per-category probability thresholds (sensitive & questionable allowed, explicit blocked).<br>• Primary call → **Gemma-3 on OpenUI**; fallback → **Gemini 2 Flash**.                                                                                                                                                                                                                                                             |
+| `WildcardLoader.astro`                | *Client-only island* for loading `.txt` wildcard files:<br>• **Drag & drop** or **browse** files manually.<br>• **Load defaults** from Hugging Face (`danbooru`, `natural-language`).<br>• **Multi-level cherry-picking**:<br>  1️⃣ **Collection selector** (top-level)<br>  2️⃣ **Category pills** (e.g., `clothing`, `styles`)<br>  3️⃣ **File pills** (wrap + multi-select)<br>• Can load **entire categories** *or* only selected files.<br>• Auto-wraps file pills to new lines.<br>• Remove files individually 🗑️ or **clear all** 🧹.<br>• Emits `wildcards-loaded` with full `{ [filename]: lines[] }` structure. |
+| `PromptBuilder.astro`                 | Builds the **initial prompt** by randomly sampling lines from selected wildcards.<br>• User controls sample count per file.<br>• Supports **🔄 Re-roll**, manual editing, and live broadcasting via `initial-prompt`.                                                                                                                                                                                                                                                                                                                     |
+| `LLMControls.astro`                   | Sends prompt + instructions to the backend:<br>• Optional **extra instructions** textarea.<br>• Choose from **system prompt presets** (`danbooru`, `natural-language`, future).<br>• POSTs everything to `/.netlify/functions/generatePrompt`.                                                                                                                                                                                                                                                                                             |
+| `PromptSaver.astro`                  | Local prompt memory:<br>• Save most recent LLM output 📌<br>• View full list 📜<br>• Download all as `prompts.txt` ⬇️<br>• Clear saved prompts 🗑️<br>• Button state updates automatically based on interaction.<br>• No backend; all browser-local.                                                                                                                                                                                                                                                   |
+| `netlify/functions/generatePrompt.js` | • Configurable `SYSTEM_PRESETS` (e.g., Danbooru / NL)<br>• **OpenAI Moderation API** with per-category probability thresholds (`BLOCK_THRESHOLDS`)<br>• Blocks only flagged categories exceeding your explicitness thresholds (e.g., allow sensitive/questionable, block explicit/minors).<br>• Sends clean prompts to **Gemma-3 via OpenUI**<br>• Auto-fallback to **Gemini 2 Flash** if Gemma fails.                                                                                                                                                       |
 
 ---
 
@@ -69,41 +68,70 @@ graph TD
   C -- initial-prompt --> D[LLMControls]
   D -- preset/instr + prompt --> F(generatePrompt.js)
   F -- refined prompt --> G[TerminalOutput]
-```
+  G --> H[PromptSaver]
+````
 
-1. **Wildcard ingestion**
-   *User uploads files or clicks “Load defaults”.* Loader pulls manifests from
-   `https://huggingface.co/datasets/ConquestAce/wildcards/...`, letting the user
-   toggle **categories** (pills) and **individual files** (pills that wrap).
+---
 
-2. **Prompt building**
-   PromptBuilder samples **N lines / file** (user-configurable), assembles an
-   initial prompt, shows it in a textarea, and dispatches it.
+### 📦 Wildcard Ingestion
 
-3. **LLM call**
-   LLMControls collects:
+Loader pulls manifests from:
+`https://huggingface.co/datasets/ConquestAce/wildcards/...`
 
-   * `initialPrompt` (from above)
-   * `preset` (Danbooru / Natural-language / future)
-   * `instructions` (free-form)
-     → POSTs to `/generatePrompt`.
+Supports:
 
-4. **Safety & refinement**
-   Serverless function runs the OpenAI **/moderations** API.
-   *Categories & thresholds* are editable in one object.
-   Clean prompts flow to Gemma-3; fallback to Gemini Flash.
-   Response is streamed back to the terminal.
+* ✅ **Collection selection** (danbooru / natural-language)
+* ✅ **Category pills** (e.g., `clothing`, `styles`, etc.)
+* ✅ **File pills** (multi-selectable, wrapped to fit screen)
+* ✅ Loading **entire categories** or just selected files
+
+---
+
+### 🛠 Prompt Generation
+
+* Built dynamically by sampling `N` lines from each wildcard file
+* Shown in a textarea for editing
+* Can be re-rolled or edited manually
+* Dispatched downstream via `initial-prompt`
+
+---
+
+### 🧠 LLM Prompting
+
+* Collects:
+
+  * `initialPrompt`
+  * `preset` (controls system prompt)
+  * `instructions` (user-typed refinements)
+* POSTs to `/.netlify/functions/generatePrompt`
+* Serverless function:
+
+  * Runs **OpenAI Moderation API**
+  * Checks per-category **probability scores** via `BLOCK_THRESHOLDS`
+  * Sends safe prompt to **Gemma-3 (OpenUI)** or **Gemini 2 Flash** fallback
+
+---
+
+### 💾 Saving Prompts
+
+* All LLM outputs appear in `TerminalOutput`
+* Click 📌 to save the prompt
+* Toggle 📜 to view saved prompts inline
+* Download all with ⬇️
+* Clear all with 🗑️
 
 ---
 
 ## 🔧 Configuration Pointers
 
-| What to change                         | Where                                                                                                       |
-| -------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Add a new wildcard collection**      | Upload `.txt` files + manifest to HF, then extend `collectionSelector` (if new top-level) and/or manifests. |
-| **Add a new system-prompt preset**     | Add key in `SYSTEM_PRESETS` and a `<option>` in `LLMControls.astro`.                                        |
-| **Adjust moderation strictness**       | Edit `BLOCK_THRESHOLDS` in `generatePrompt.js`.                                                             |
-| **Tweak UI colors / Tailwind classes** | Modify the class strings in the `.astro` components.                                                        |
+| What to change                         | Where                                                                                                 |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Add a new wildcard collection**      | Upload `.txt` files + manifest to Hugging Face. Then extend `collectionSelector` in `WildcardLoader`. |
+| **Add a new system-prompt preset**     | Add key in `SYSTEM_PRESETS` (Netlify function) and `<option>` in `LLMControls.astro`.                 |
+| **Adjust moderation strictness**       | Edit per-category `BLOCK_THRESHOLDS` in `generatePrompt.js`.                                          |
+| **Change sample count per file**       | Modify PromptBuilder’s sampling logic.                                                                |
+| **Tweak file/category UI styling**     | Edit Tailwind class names in `WildcardLoader.astro`.                                                  |
+| **Change file pill wrapping behavior** | Adjust CSS: use `flex-wrap` and `max-h` in `.file-wrap`.                                              |
 
 ---
 
@@ -112,31 +140,38 @@ graph TD
 ```bash
 # Install deps
 npm i
+
 # Run Astro dev server
 npm run dev
-# Netlify Functions locally (via netlify-cli)
+
+# Run Netlify Functions locally
 netlify dev
 ```
 
-Set the following environment variables:
+Set the following environment variables in `.env` or Netlify:
 
-* `OUI_API_KEY` – OpenUI Gemma-3 endpoint
-* `GEMINI_API_KEY` – Google Generative AI
-* `OPENAI_API_KEY` – for moderation calls
+* `OUI_API_KEY` — for Gemma 3 (OpenUI)
+* `GEMINI_API_KEY` — for Gemini fallback
+* `OPENAI_API_KEY` — for moderation scoring
 
 ---
 
 ## 🤝 Credits
 
-* **Wildcard dataset** hosted at [https://huggingface.co/datasets/ConquestAce/wildcards](https://huggingface.co/datasets/ConquestAce/wildcards).
-* Gemma-3 served via **OpenUI** .
-* Backup model: **Gemini 2 Flash**.
-* Moderation powered by **OpenAI** `/moderations` endpoint.
+* Wildcard dataset: [ConquestAce/wildcards](https://huggingface.co/datasets/ConquestAce/wildcards)
+* OpenUI Gemma-3: `gemma3:1b-it-fp16`
+* Google Gemini 2 Flash fallback
+* Moderation via OpenAI `/moderations` endpoint
 
-Enjoy building refined prompts without ever exposing sensitive wildcard files to the LLM!
+---
 
-## Contributing
-Pull requests are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).
+## 💬 Contributing
 
-## License
-Credit me if you want, or dont. I vibe coded all of this, but still took plently of time. Currently at 100 hours of my time :) © 2025 Ashiful Bhuiyan
+Pull requests welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
+
+---
+
+## ⚖️ License
+
+Credit me if you want, or don’t. I vibe-coded all of this over \~100 hours.
+© 2025 Ashiful Bhuiyan
