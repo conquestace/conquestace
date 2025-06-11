@@ -22,3 +22,31 @@ body.matrix-mode footer {
   filter: blur(1px);
   transition: all 0.6s ease-in-out;
 }
+
+.drop-zone {
+  @apply flex flex-col items-center justify-center
+          border-2 border-dashed border-lightblue
+          rounded-lg p-6 text-lightblue text-sm cursor-pointer;
+}
+.drop-zone.drag {
+  @apply bg-slatecard border-mathblue;
+}
+
+.cat-scroll {
+  @apply flex gap-2 items-center 
+          max-w-full overflow-x-auto mt-1;
+  /* hide scrollbar in all engines */
+  scrollbar-width: none;            /* Firefox */
+}
+.cat-scroll::-webkit-scrollbar {    /* Chrome/Safari */
+  display: none;
+}
+
+.cat-btn {
+  @apply bg-slatecard text-lightblue px-2 py-1 rounded
+          cursor-pointer whitespace-nowrap text-xs;
+  user-select: none;
+}
+.cat-btn.active {
+  @apply bg-mathblue text-white;
+}

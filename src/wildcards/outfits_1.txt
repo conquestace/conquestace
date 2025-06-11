@@ -1,0 +1,69 @@
+ pink dress, strawberry print, apron dress, puffed sleeves, lace trim, ribbon, bows, straw hat, thighhighs, mary janes
+gothic ta, black and red corset dress, off shoulder dress, puffed sleeves, lace trim, choker, garter straps, thighhighs, mini top hat, mary janes
+maid outfit, frilled apron, maid headdress, thighhighs, mary janes, hair ribbon, gloves, frilled skirt, cute dress
+kimono, floral print, obi, wide sleeves, hair ornament, tabi, sandals, traditional japanese clothes, pastel colors
+witch costume, black and orange dress, corset dress, puffed sleeves, striped thighhighs, lace trim, witch hat, choker, boots
+qipao, floral print, sleeveless, side slit, hair ornament, high heels, thighhighs, lace trim, bow garter
+idol outfit, pink and blue dress, puffed sleeves, large bow, frilly skirt, corset dress, layered skirt, heart motif, ribbon, thighhigh boots
+fantasy armor, armored dress, gauntlets, armored boots, cape, skirt armor, gloves, ornate design
+school uniform, sailor uniform, pleated skirt, loose socks, loafers, hair ribbon
+princess dress, ornate gown, lace gloves, tiara, layered skirt, jewel accessories, mary janes, ribbon, off shoulder dress
+gothic_ta, black_dress, corset, layered_skirt, lace_trim, ribbon, thighhighs, choker, mary_janes, hair_bow
+sweet_ta, pastel_dress, puffed_sleeves, frilled_skirt, apron, ribbon, stockings, mary_janes, straw_hat, flower_trim
+traditional_kimono, floral_print, obi, wide_sleeves, hair_ornament, tabi, geta, fan, japanese_clothes
+idol_outfit, crop_top, pleated_skirt, thighhigh_boots, gloves, large_bow, star_motif, ribbon, microphone
+witch, corset_dress, puffed_sleeves, striped_thighhighs, lace_trim, witch_hat, cape, boots, broom
+maid, frilled_apron, maid_headdress, thighhighs, mary_janes, hair_ribbon, short_sleeves, gloves, cute_dress
+bunny_suit, leotard, bunny_ears, bowtie, cuffs, fishnet_thighhighs, high_heels, collar
+school_uniform, sailor_uniform, pleated_skirt, ribbon, loafers, loose_socks, cardigan, glasses
+steampunk, corset, layered_skirt, goggles, lace_trim, gloves, boots, pocket_watch, choker
+princess, ballgown, off_shoulder_dress, lace_gloves, tiara, necklace, ribbon, high_heels, ornate
+cheerleader, sleeveless_shirt, pleated_skirt, sneakers, hair_bow, pom_poms, striped_legwear
+qipao, floral_pattern, side_slit, sleeveless_dress, thighhighs, hair_buns, high_heels, earrings
+winter_outfit, sweater, scarf, gloves, coat, thighhighs, boots, earmuffs, snowflake_motif
+wedding_dress, strapless_dress, layered_skirt, veil, lace_gloves, bouquet, necklace, white_dress
+casual_outfit, hoodie, denim_shorts, sneakers, hairband, backpack, simple_clothes, modern_fashion
+summer_dress, sundress, floral_print, straw_hat, sandals, basket, sleeveless, ribbon_trim
+traditional_hanbok, korean_clothes, floral_pattern, ribbon, slippers, hair_ornament, wide_sleeves
+military_uniform, jacket, pleated_skirt, epaulettes, beret, gloves, boots, belt, medals
+fantasy_mage, robe, hooded_cloak, magic_staff, boots, belt, gloves, medieval_fashion
+winter_coat, scarf, mittens, thighhighs, boots, earmuffs, skirt, fur_trim, sweater
+turtleneck, jacket, scarf, leggings, boots, gloves, knit_hat, denim_skirt
+winter_outfit, hooded_coat, plaid_scarf, boots, tights, sweater, earmuffs, gloves
+coat, knitted_scarf, long_skirt, boots, earmuffs, thighhighs, mittens, wool_hat
+winter_clothes, oversized_sweater, scarf, gloves, leggings, fur_boots, knit_hat, earmuffs
+hoodie, padded_jacket, plaid_scarf, thighhighs, winter_boots, gloves, skirt, earmuffs
+winter_coat, turtleneck_sweater, scarf, skirt, leggings, boots, gloves, hair_ribbon
+knit_sweater, scarf, earmuffs, pleated_skirt, leggings, mittens, thighhighs, boots
+winter_fashion, fur_coat, sweater, gloves, earmuffs, stockings, boots, knitted_hat
+cardigan, winter_jacket, scarf, gloves, leggings, skirt, thighhighs, fur_boots
+oversized_sweater, wool_scarf, boots, gloves, earmuffs, thighhighs, skirt, knitted_hat
+winter_outfit, long_coat, scarf, gloves, sweater, leggings, boots, fur_trim
+jacket, knitted_scarf, earmuffs, skirt, thighhighs, gloves, sweater, boots
+winter_clothes, coat, scarf, leggings, gloves, knitted_hat, boots, sweater_dress
+puffer_jacket, scarf, earmuffs, gloves, jeans, boots, sweater, winter_fashion
+hooded_coat, plaid_scarf, skirt, gloves, thighhighs, winter_boots, earmuffs, sweater
+winter_jacket, sweater, scarf, leggings, earmuffs, thighhighs, boots, gloves
+coat, knitted_sweater, scarf, gloves, leggings, boots, earmuffs, skirt
+winter_outfit, padded_jacket, plaid_scarf, earmuffs, gloves, thighhighs, boots, skirt
+knit_sweater, scarf, coat, leggings, gloves, earmuffs, thighhighs, boots
+floral_print, sundress, straw_hat, sandals, ribbon, sleeveless, basket, necklace
+pastel_colors, cardigan, skirt, hair_ribbon, sneakers, ankle_socks, blouse, spring_outfit
+light_jacket, dress, floral_pattern, leggings, hairband, flats, cute_fashion, scarf
+spring_outfit, blouse, pleated_skirt, sandals, floral_print, ribbon, straw_hat, handbag
+sundress, floral_pattern, sleeveless, sandals, straw_hat, ribbon, hair_bow, bracelet
+spring_dress, cardigan, floral_print, sandals, straw_hat, short_sleeves, hairband, flats
+blouse, skirt, pastel_colors, mary_janes, ribbon, floral_pattern, socks, cardigan
+floral_print, long_skirt, blouse, straw_hat, sandals, necklace, spring_outfit, hair_ribbon
+pastel_dress, cardigan, hair_bow, sandals, basket, floral_pattern, ribbon, short_sleeves
+spring_outfit, floral_skirt, blouse, cardigan, sandals, ribbon, straw_hat, hairband
+dress, floral_print, cardigan, mary_janes, ankle_socks, ribbon, hair_ribbon, bracelet
+spring_fashion, sleeveless_dress, floral_pattern, sandals, hair_bow, cardigan, ribbon, straw_hat
+skirt, blouse, pastel_colors, sandals, cardigan, straw_hat, hairband, floral_print
+spring_outfit, floral_dress, ribbon, sandals, cardigan, necklace, short_sleeves, straw_hat
+floral_skirt, cardigan, blouse, mary_janes, ankle_socks, ribbon, straw_hat, pastel_colors
+floral_print, sundress, sandals, hair_ribbon, cardigan, straw_hat, basket, bracelet
+spring_outfit, blouse, floral_skirt, cardigan, mary_janes, ribbon, hair_bow, necklace
+pastel_colors, cardigan, dress, sandals, straw_hat, hairband, floral_print, ribbon
+floral_pattern, skirt, blouse, cardigan, sandals, straw_hat, spring_outfit, hair_ribbon
+sundress, floral_print, cardigan, sandals, ribbon, straw_hat, hair_bow, short_sleeves

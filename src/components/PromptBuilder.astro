@@ -1,0 +1,101 @@
+---
+/* components/PromptBuilder.astro
+   Builds an initial prompt, emits `initial-prompt` whenever the textarea changes */
+---
+<div class="flex flex-col gap-4" data-builder>
+  <h2 class="font-medium text-lightblue text-lg">🎛️ Arrange & sample</h2>
+
+  <!-- dynamic file list -->
+  <ul id="file-list" class="space-y-2"></ul>
+
+  <button id="build-btn"
+          class="bg-blue-700 text-white px-3 py-2 rounded disabled:opacity-40"
+          disabled>
+    🔄 Build / Re-roll
+  </button>
+
+  <label class="font-medium text-white">📝 Initial prompt preview</label>
+  <textarea id="prompt-box" rows="4"
+            class="w-full bg-slatecard p-2 rounded resize-y font-mono
+                   text-lightblue placeholder:text-slate-500"
+            placeholder="Click “Build / Re-roll” to generate…"></textarea>
+</div>
+
+<script is:client>
+  const list  = document.getElementById('file-list');
+  const build = document.getElementById('build-btn');
+  const box   = document.getElementById('prompt-box');
+
+  /* each entry: { name, lines, count } */
+  let files = [];
+
+  /* ─────────── receive wildcards ─────────── */
+  window.addEventListener('wildcards-loaded', e => {
+    files = Object.entries(e.detail).map(([name, lines]) => ({
+      name, lines, count: 1
+    }));
+    render();
+    build.disabled = !files.length;
+  });
+
+  /* ─────────── build / re-roll ─────────── */
+  build.addEventListener('click', () => {
+    box.value = files.flatMap(f => sample(f.lines, f.count)).join(', ').trim();
+    fire();          // dispatch `initial-prompt`
+  });
+
+  /* manual edits propagate too */
+  box.addEventListener('input', fire);
+
+  /* ─────────── helpers ─────────── */
+  function fire() {
+    window.dispatchEvent(new CustomEvent('initial-prompt', {
+      detail: box.value.trim()
+    }));
+  }
+
+  /* random-with-replacement line picker */
+  function sample(arr, n) {
+    const out = [];
+    for (let i = 0; i < n && arr.length; i++) {
+      out.push(arr[Math.floor(Math.random() * arr.length)].trim());
+    }
+    return out;
+  }
+
+  /* redraw file list with drag-n-drop + count fields */
+  function render() {
+    list.innerHTML = '';
+    files.forEach((f, idx) => {
+      const li = document.createElement('li');
+      li.className =
+        'bg-slatecard p-2 rounded flex items-center gap-3 draggable';
+      li.draggable = true;
+
+      li.innerHTML = `
+        <span class="cursor-move select-none">↕️</span>
+        <span class="flex-1 truncate">${f.name}</span>
+        <input type="number" min="1" value="${f.count}"
+               class="w-16 bg-midnight text-lightblue p-1 rounded text-right" />
+      `;
+
+      /* drag & drop ordering */
+      li.addEventListener('dragstart', e =>
+        e.dataTransfer.setData('idx', idx));
+      li.addEventListener('dragover', e => e.preventDefault());
+      li.addEventListener('drop', e => {
+        e.preventDefault();
+        const from = +e.dataTransfer.getData('idx');
+        files.splice(idx, 0, files.splice(from, 1)[0]);
+        render();                    // re-render after reorder
+      });
+
+      /* update count */
+      li.querySelector('input').addEventListener('input', ev => {
+        f.count = Math.max(1, +ev.target.value);
+      });
+
+      list.appendChild(li);
+    });
+  }
+</script>

@@ -1,0 +1,73 @@
+---
+/* components/LLMControls.astro */
+---
+
+<div class="flex flex-col gap-4" data-llm>
+  <!-- free-form additions -->
+  <label class="font-medium text-white">📄 Extra instructions to the LLM</label>
+  <textarea id="llm-notes" rows="3"
+            class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
+
+  <!-- preset selector -->
+  <label class="font-medium text-white">
+    System-prompt preset
+    <select id="llmPreset" class="bg-slatecard p-1 rounded ml-2">
+      <option value="danbooru">Danbooru preset</option>
+      <option value="natural-language">Natural-language preset</option>
+      <!-- add more <option>s as you introduce new presets -->
+    </select>
+  </label>
+
+  <!-- send -->
+  <button id="send-btn"
+          class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40"
+          disabled>
+    🚀 Send to LLM
+  </button>
+</div>
+
+<script is:client>
+  /* element refs */
+  const btn   = document.getElementById('send-btn');
+  const notes = document.getElementById('llm-notes');
+  const presetSel = document.getElementById('llmPreset');
+
+  let initialPrompt = '';
+
+  /* get initial prompt from PromptBuilder */
+  window.addEventListener('initial-prompt', e => {
+    initialPrompt = e.detail.trim();
+    btn.disabled = !initialPrompt;
+  });
+
+  /* click → POST to Netlify function */
+  btn.addEventListener('click', async () => {
+    if (!initialPrompt) return;
+    btn.disabled = true;
+    post('🚀 Sending to LLM…');
+
+    try {
+      const res = await fetch('/.netlify/functions/generatePrompt', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          initialPrompt,
+          preset: presetSel.value,          // <── chosen preset
+          instructions: notes.value.trim()  // <── extra textarea
+        })
+      });
+
+      const { text, error } = await res.json();
+      post(text || `❌ ${error || 'Generation failed.'}`);
+    } catch (err) {
+      post(`❌ Network error: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  /* utility: publish to TerminalOutput */
+  function post(msg) {
+    window.dispatchEvent(new CustomEvent('terminal-msg', { detail: msg }));
+  }
+</script>

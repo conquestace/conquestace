@@ -18,7 +18,7 @@ const fullMessages = [systemPrompt, ...messages];
     // === 1. Try OpenUI with 5s timeout ===
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 1000); // 5 seconds
+      const timeout = setTimeout(() => controller.abort(), 30000); // 5 seconds
     
       const ouiRes = await fetch("https://oui.gpu.garden/api/chat/completions", {
         method: "POST",
@@ -28,7 +28,13 @@ const fullMessages = [systemPrompt, ...messages];
         },
         body: JSON.stringify({
         model: "gemma3:1b-it-fp16",
-        messages: fullMessages
+        messages: fullMessages,
+        max_tokens: 1000,
+        top_p: 0.9,
+        temperature: 0.1,
+        presence_penalty: 0.5,
+        frequency_penalty: 0.5,
+        stop: ["INVALID QUERY", "BREAK"] // Add stop sequences here
         }),
         signal: controller.signal
       });
