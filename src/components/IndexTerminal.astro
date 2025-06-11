@@ -21,90 +21,115 @@
 
 <script is:global>
   if (typeof window !== 'undefined') {
-    const inlineForm = document.getElementById('inline-form');
-    const inlineInput = document.getElementById('inline-input');
-    const inlineLog = document.getElementById('inline-log');
-
+    /* ── 1. Filesystem ── */
     const fileSystem = {
-      'mathcodes.app': 'https://mathcodes.org',
-      'portfolio.cv': 'https://ashiful.institute/me',
-      'giftedcenter': 'https://giftedcenter.org',
-      'scholarsupport.space': 'https://scholarsupport.space',
-      'ai.exe': 'https://ashiful.institute',
+      websites: {
+        'mathcodes.app':          'https://mathcodes.org',
+        'portfolio.cv':           'https://ashiful.institute/me',
+        'giftedcenter':           'https://giftedcenter.org',
+        'scholarsupport.space':   'https://scholarsupport.space',
+        'ai.exe':                 'https://ashiful.institute'
+      },
+      apps: {
+        'wildcarder.py': 'https://conquestace.com/wildcarder',
+        'newtab':        'https://conquestace.com/newtab'
+      },
       'PROJECT_README.md': 'https://github.com/conquestace/conquestace',
-      'secrets/': null  // non-clickable
+      secrets: null
     };
 
-  inlineForm?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const inputText = inlineInput.value.trim();
-    if (!inputText) return;
+    /* ── 2. Runtime state & helpers ── */
+    const pathStack  = [];
+    const cwd        = () => pathStack.reduce((d,p)=>d?.[p], fileSystem);
 
-    const cmd = inputText.toLowerCase();
-    inlineLog.innerHTML += `<div><span class="text-sky">conquestace@home</span>:~$ ${inputText}</div>`;
-    inlineInput.value = '';
+    const $form = document.getElementById('inline-form');
+    const $input = document.getElementById('inline-input');
+    const $log  = document.getElementById('inline-log');
 
-    if (cmd === 'clear') {
-      inlineLog.innerHTML = '';
-      return;
+    const logSys  = t => $log.innerHTML += `<div><span class="text-sky">sys</span>: ${t}</div>`;
+    const logLine = t => $log.innerHTML += `<div><span class="text-sky">conquestace@home</span>:~${pathStack.length?'/'+pathStack.join('/'):''}$ ${t}</div>`;
+    const scroll  = () => $log.scrollTop = $log.scrollHeight;
+
+    /* ── 3. Directory listing ── */
+    function listDir () {
+      const dir = cwd(); if (!dir) { logSys('Directory error.'); return; }
+
+      let html = '';
+      if (pathStack.length) {
+        html += `<span class="terminal-folder touch" data-cd=".." tabindex="0">go&nbsp;back/</span>  `;
+      }
+      for (const name in dir) {
+        const entry = dir[name];
+        html += entry && typeof entry === 'string'
+          ? `<a href="${entry}" target="_blank" class="terminal-file terminal-link touch" tabindex="0">${name}</a>  `
+          : `<span class="terminal-folder touch" data-cd="${name}" tabindex="0">${name}/</span>  `;
+      }
+      logSys(html.trim());
     }
 
-    if (cmd === 'hack') {
-      const footer = document.querySelector('footer');
-      if (footer) {
-        footer.style.animation = 'glitchOut 1s ease forwards';
-        setTimeout(() => {
-          document.body.classList.add('matrix-mode');
-        }, 1000);
+    /* ── 4. Navigation ── */
+    function changeDir (arg) {
+      if (arg === '/')  { pathStack.length = 0; return listDir(); }
+      if (arg === '..') { pathStack.pop();     return listDir(); }
+
+      const dir = cwd();
+      if (dir && dir.hasOwnProperty(arg) && typeof dir[arg] !== 'string') {
+        if (arg === 'secrets') logSys('Permission denied. [secrets] is classified.');
+        else { pathStack.push(arg); listDir(); }
       } else {
-        document.body.classList.add('matrix-mode');
+        logSys(`cd: ${arg}: No such directory`);
       }
-      triggerMatrix();
-      inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Initiating protocol...</div>`;
-      return;
     }
 
-    if (cmd === 'terminal') {
-      document.dispatchEvent(new CustomEvent('open-console-overlay'));
-      inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Console overlay opened.</div>`;
-      return;
+    /* ── 5. Built-ins ── */
+    function builtin (c) {
+      if (c === 'clear')   { $log.innerHTML = ''; return true; }
+      if (c === 'hack')    { triggerEffect('Initiating protocol…'); return true; }
+      if (c === 'terminal'){ triggerEffect('Console overlay opened.','open-console-overlay'); return true; }
+      return false;
     }
 
-    if (cmd === 'ls') {
-      let output = '<div><span class="text-sky">sys</span>: ';
-      for (const name in fileSystem) {
-        const isFolder = name.endsWith('/');
-        const href = fileSystem[name];
-        if (href) {
-          output += `<a href="${href}" target="_blank" class="terminal-file terminal-link">${name}</a>  `;
-        } else {
-          output += `<span class="terminal-folder">${name}</span>  `;
-        }
-      }
-      output += '</div>';
-      inlineLog.innerHTML += output;
-    } else if (cmd.startsWith('cd ')) {
-      const folder = cmd.slice(3).trim();
-      if (folder === 'secrets' || folder === 'secrets/') {
-        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Permission denied. [secrets] is classified.</div>`;
+    /* ── 6. Form submit ── */
+    $form.addEventListener('submit', e => {
+      e.preventDefault();
+      const raw = $input.value.trim();
+      if (!raw) return;
+      const cmd = raw.toLowerCase();
+
+      logLine(raw); $input.value = '';
+
+      if (builtin(cmd))        { scroll(); return; }
+      if (cmd === 'ls')        { listDir(); scroll(); return; }
+      if (cmd.startsWith('cd ')){ changeDir(cmd.slice(3).trim()); scroll(); return; }
+
+      /* open or error */
+      const dir = cwd();
+      if (dir && dir[cmd] && typeof dir[cmd] === 'string') {
+        window.open(dir[cmd], '_blank');
+        logSys(`Opening ${cmd}…`);
       } else {
-        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: cd: ${folder}: No such directory</div>`;
+        logSys('Unknown command or file. Try <code>ls</code>.');
       }
-    } else if (fileSystem.hasOwnProperty(cmd)) {
-      const link = fileSystem[cmd];
-      if (link) {
-        window.open(link, '_blank');
-        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Opening ${cmd}...</div>`;
-      } else {
-        inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: ${cmd} is a directory. Use <code>cd</code> instead.</div>`;
-      }
-    } else {
-      inlineLog.innerHTML += `<div><span class="text-sky">sys</span>: Unknown command or file. Try <code>ls</code> or press Ctrl+X.</div>`;
-    }
+      scroll();
+    });
 
-    inlineLog.scrollTop = inlineLog.scrollHeight;
-  });
+    /* ── 7. Tap-to-navigate ── */
+    $log.addEventListener('click', e => {
+      const cd = e.target.getAttribute('data-cd');
+      if (cd !== null) { changeDir(cd); scroll(); }
+    });
+
+    /* ── 8. Initial directory dump ── */
+    document.addEventListener('DOMContentLoaded', listDir);
+
+    /* ── 9. Effect helpers ── */
+    function triggerEffect (msg, evt=null) {
+      if (evt) document.dispatchEvent(new CustomEvent(evt));
+      logSys(msg);
+      if (msg.includes('protocol')) triggerMatrix();
+    }
   }
+
 
   function triggerMatrix() {
     if (document.getElementById('matrix-bg')) return;
@@ -174,3 +199,11 @@
     drawMatrix();
   }
 </script>
+
+
+<style>
+  /* extra finger-size hit-area & hover */
+  .touch{ display:inline-block; padding:0.25rem 0.35rem; border-radius:0.25rem; }
+  .terminal-folder.touch:hover,
+  .terminal-file.touch:hover{ background:#334155; }
+</style>

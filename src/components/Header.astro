@@ -3,19 +3,43 @@
 
 <script>
   if (typeof window !== 'undefined') {
-    const sets = [
+    /* ───── 1. Symbols for the visual shuffle ───── */
+    const symbolSets = [
       ['∴', '⊗', '(>_<)', 'Ξ', '???', '/\\/\\'],
       ['Δ', '⟁', '∿', 'NULL', '{-_-}', '[o_o]'],
       ['Ψ', 'λ', '(°□°)', '!!!', '404', '|_|'],
       ['Ω', '∞', '§', 'end', '<^_^>', '[+++]']
     ];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      document.querySelectorAll('.chaotic-link').forEach((el, index) => {
+    /* ───── 2. All internal pages the nav may point to ───── */
+    const pagePool = [
+      '/',                // home
+      '/index',
+      '/newtab',
+      '/wildcarder',
+      // '/blog',
+      // '/about',
+      // '/contact'
+      // add /anything-else you build later
+    ];
+
+    /* ───── 3. Wire it up ───── */
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.chaotic-link').forEach((el, idx) => {
         let i = 0;
+        const randomPage = () =>
+          pagePool[Math.floor(Math.random() * pagePool.length)];
+
+        /* give each link an initial random destination */
+        el.href = randomPage();
+
         setInterval(() => {
-          i = (i + 1) % sets[index].length;
-          el.textContent = sets[index][i];
+          /* rotate the glyph */
+          i = (i + 1) % symbolSets[idx].length;
+          el.textContent = symbolSets[idx][i];
+
+          /* rotate the destination, too */
+          el.href = randomPage();
         }, 900 + Math.random() * 500);
       });
     });
