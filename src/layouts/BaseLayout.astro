@@ -15,6 +15,14 @@ import TerminalOverlay from '../components/TerminalOverlay.astro';
     <Header />
     <main class="flex-1 container mx-auto px-6 py-8">
       <slot />
+      <img
+  src="/glitchtiger.gif"
+  alt=""
+  class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+         w-[25vmin] max-w-none h-auto opacity-10
+         pointer-events-none -z-10 select-none"
+  loading="lazy"
+/>
     </main>
     <TerminalOverlay />
     <Footer />

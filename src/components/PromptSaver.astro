@@ -1,0 +1,77 @@
+---
+/* components/PromptSaver.astro */
+---
+
+<div class="flex flex-wrap items-center gap-3 mt-4" data-saver>
+  <button id="psSave"    class="bg-indigo-600 text-white px-3 py-1 rounded disabled:opacity-40" disabled>📌 Save prompt</button>
+    <button id="psToggle"   class="bg-slatecard text-lightblue px-3 py-1 rounded disabled:opacity-40" disabled>📜 View saved</button>
+  <button id="psDownload" class="bg-lightblue text-midnight px-3 py-1 rounded disabled:opacity-40" disabled>⬇️ Download prompts.txt</button>
+  <button id="psClear"    class="bg-red-500 text-white px-3 py-1 rounded disabled:opacity-40" disabled>🗑️ Clear </button>
+  <span   id="psBadge"    class="text-lightblue text-sm"></span>
+</div>
+
+<ul id="psList"
+    class="mt-2 bg-slatecard p-2 rounded text-lightblue text-xs font-mono
+           max-h-40 overflow-y-auto hidden"></ul>
+
+<script is:client>
+(() => {
+  /* ---------- state ---------- */
+  let lastPrompt = '';
+  const saved    = [];
+  let listOpen   = false;
+
+  /* ---------- refs ---------- */
+  const saveBtn = document.getElementById('psSave');
+  const dlBtn   = document.getElementById('psDownload');
+  const clrBtn  = document.getElementById('psClear');
+  const toggle  = document.getElementById('psToggle');
+  const badge   = document.getElementById('psBadge');
+  const listEl  = document.getElementById('psList');
+
+  /* ---------- helper ---------- */
+  const refresh = () => {
+    saveBtn.disabled  = !lastPrompt;
+    const any         = saved.length > 0;
+    dlBtn.disabled    = !any;
+    clrBtn.disabled   = !any;
+    toggle.disabled   = !any;
+    badge.textContent = any ? `Saved: ${saved.length}` : '';
+    toggle.textContent= listOpen ? '📕 Hide saved' : '📜 View saved';
+    listEl.classList.toggle('hidden', !listOpen);
+  };
+
+  const updateList = () =>
+    listEl.innerHTML = saved
+      .map((t,i)=>`<li class="mb-1"><strong>${i+1}.</strong> ${t}</li>`)
+      .join('');
+
+  /* ---------- events ---------- */
+  window.addEventListener('terminal-msg', e => {
+    lastPrompt = (e.detail || '').trim();
+    refresh();
+  });
+
+  saveBtn.onclick = () => {
+    if (!lastPrompt) return;
+    saved.push(lastPrompt);
+    updateList(); refresh();
+  };
+
+  dlBtn.onclick = () => {
+    if (!saved.length) return;
+    const blob = new Blob([saved.join('\n')], { type:'text/plain' });
+    const url  = URL.createObjectURL(blob);
+    Object.assign(document.createElement('a'), {
+      href:url, download:'prompts.txt'
+    }).click();
+    URL.revokeObjectURL(url);
+  };
+
+  toggle.onclick = () => { listOpen = !listOpen; refresh(); };
+
+  clrBtn.onclick = () => { saved.length = 0; listOpen = false; updateList(); refresh(); };
+
+  refresh();  // init
+})();
+</script>

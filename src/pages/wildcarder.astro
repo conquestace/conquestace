@@ -4,6 +4,7 @@ import WildcardLoader from '../components/WildcardLoader.astro';
 import PromptBuilder  from '../components/PromptBuilder.astro';
 import LLMControls    from '../components/LLMControls.astro';
 import TerminalOutput from '../components/TerminalOutput.astro';
+import PromptSaver    from '../components/PromptSaver.astro';
 ---
 
 <BaseLayout title="Wildcard Prompt Generator">
@@ -20,5 +21,7 @@ import TerminalOutput from '../components/TerminalOutput.astro';
 
     <!-- 4. live log -->
     <TerminalOutput />
+    <PromptSaver />
+
   </div>
 </BaseLayout>

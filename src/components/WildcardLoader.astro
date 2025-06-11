@@ -5,16 +5,6 @@
 
 <!-- ───── top controls ───── -->
 <div class="flex flex-wrap items-center gap-3">
-  <button id="loadDefaults"
-          class="bg-lightblue text-midnight px-3 py-1 rounded">
-    📂 Load default wildcards
-  </button>
-
-  <button id="clearWildcards"
-          class="bg-red-500 text-white px-3 py-1 rounded">
-    🧹 Clear wildcards
-  </button>
-
   <label class="text-lightblue text-sm">
     Collection:
     <select id="collectionSelector" class="bg-slatecard p-1 rounded">
@@ -23,6 +13,7 @@
     </select>
   </label>
 </div>
+
 
 <!-- ───── pill bars ───── -->
 <label class="text-lightblue text-sm block mt-2">Categories:</label>
@@ -39,7 +30,15 @@
   </div>
   <ul id="fileList" class="space-y-1 text-lightblue text-sm font-mono"></ul>
 </div>
+ <button id="loadDefaults"
+          class="bg-lightblue text-midnight px-3 py-1 rounded">
+    📂 Load default wildcards
+  </button>
 
+  <button id="clearWildcards"
+          class="bg-red-500 text-white px-3 py-1 rounded">
+    🧹 Clear wildcards
+  </button>
 <script is:client>
   /* ───────── constants ───────── */
   const HF_BASE =
