@@ -50,3 +50,22 @@ body.matrix-mode footer {
 .cat-btn.active {
   @apply bg-mathblue text-white;
 }
+  .scroll-bar {
+    @apply flex gap-2 items-center overflow-x-auto max-w-full mt-1;
+    scrollbar-width: none;
+  }
+  .scroll-bar::-webkit-scrollbar { display: none; }
+
+  .pill {
+    @apply bg-slatecard text-lightblue px-2 py-1 rounded
+           cursor-pointer whitespace-nowrap text-xs;
+    user-select: none;
+  }
+  .pill.active { @apply bg-mathblue text-white; }
+
+    /* file pill container – wrap instead of scroll */
+  .file-wrap {
+    @apply flex flex-wrap gap-2 items-center
+           max-h-32 overflow-y-auto mt-1;  /* 8 rem tall before vertical scroll */
+  }
+  .file-wrap::-webkit-scrollbar { width: 0; height: 0; }  /* hide thin Y-scroll */

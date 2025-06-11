@@ -1,7 +1,9 @@
 ---
 /* components/WildcardLoader.astro */
 ---
-<!-- top-bar -->
+
+
+<!-- ───── top controls ───── -->
 <div class="flex flex-wrap items-center gap-3">
   <button id="loadDefaults"
           class="bg-lightblue text-midnight px-3 py-1 rounded">
@@ -20,24 +22,26 @@
       <option value="natural-language">Natural-language</option>
     </select>
   </label>
-
-  <label class="text-lightblue text-sm">
-    Categories:
-    <div id="categoryBar" class="cat-scroll"></div>
-  </label>
 </div>
 
+<!-- ───── pill bars ───── -->
+<label class="text-lightblue text-sm block mt-2">Categories:</label>
+<div id="categoryBar" class="scroll-bar"></div>
+
+<label class="text-lightblue text-sm block mt-2">Files:</label>
+<div id="fileBar" class="file-wrap"></div>
+
+<!-- ───── drag-drop box & file list ───── -->
 <div class="space-y-3 mt-4">
   <div id="drop" class="drop-zone">
     <p>📁 Drag wildcard .txt files here<br/>or click to browse</p>
     <input id="fileInput" type="file" accept=".txt" multiple hidden />
   </div>
-
   <ul id="fileList" class="space-y-1 text-lightblue text-sm font-mono"></ul>
 </div>
 
 <script is:client>
-  /* — constants — */
+  /* ───────── constants ───────── */
   const HF_BASE =
     'https://huggingface.co/datasets/ConquestAce/wildcards/resolve/main/';
   const MANIFEST_MAP = {
@@ -45,89 +49,133 @@
     'natural-language': 'natural-language/manifest.json'
   };
 
-  /* — refs — */
-  const drop   = document.getElementById('drop');
-  const input  = document.getElementById('fileInput');
-  const listEl = document.getElementById('fileList');
-  const collSel= document.getElementById('collectionSelector');
-  const catBar = document.getElementById('categoryBar');
-  const loadBtn= document.getElementById('loadDefaults');
-  const clearBtn=document.getElementById('clearWildcards');
+  /* ───────── element refs ───────── */
+  const drop      = document.getElementById('drop');
+  const input     = document.getElementById('fileInput');
+  const listEl    = document.getElementById('fileList');
+  const collSel   = document.getElementById('collectionSelector');
+  const catBar    = document.getElementById('categoryBar');
+  const fileBar   = document.getElementById('fileBar');
+  const loadBtn   = document.getElementById('loadDefaults');
+  const clearBtn  = document.getElementById('clearWildcards');
 
-  /* — state — */
-  const store = new Map();         // filename → lines[]
-  const selectedCats = new Set();  // active pills
+  /* ───────── state ───────── */
+  const store         = new Map();          // filename → lines[]
+  const selectedCats  = new Set();          // active category ids
+  const selectedFiles = new Set();          // active file names
+  const manifestCache = {};                 // collection id → manifest[]
 
-  /* — helper: update file list — */
-  function updateList() {
-    listEl.innerHTML = '';
-    [...store.keys()].sort().forEach(name => {
-      const li = document.createElement('li');
-      li.className = 'flex items-center justify-between bg-slatecard rounded px-2 py-1';
-      li.innerHTML = `<span class="truncate">${name}</span>
-                      <button class="text-red-400 hover:text-red-300">🗑️</button>`;
-      li.querySelector('button').addEventListener('click', () => {
-        store.delete(name); updateList(); dispatch();
-      });
-      listEl.appendChild(li);
-    });
-  }
+  /* ───────── utility ───────── */
   const dispatch = () =>
     window.dispatchEvent(new CustomEvent('wildcards-loaded',
       { detail: Object.fromEntries(store) }));
 
-  /* — drag & picker — */
-  drop.addEventListener('click', () => input.click());
-  input.addEventListener('change', () => loadFiles(input.files));
+  const updateList = () => {
+    listEl.innerHTML = '';
+    [...store.keys()].sort().forEach(name => {
+      const li = document.createElement('li');
+      li.className =
+        'flex items-center justify-between bg-slatecard rounded px-2 py-1';
+      li.innerHTML = `<span class="truncate">${name}</span>
+                      <button class="text-red-400">🗑️</button>`;
+      li.querySelector('button').onclick = () => {
+        store.delete(name); updateList(); dispatch();
+      };
+      listEl.appendChild(li);
+    });
+  };
+
+  /* ───────── drag-drop & picker ───────── */
+  drop.onclick = () => input.click();
+  input.onchange = () => addFiles(input.files);
   ['dragenter','dragover'].forEach(ev =>
     drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
   ['dragleave','drop'].forEach(ev =>
     drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
-  drop.addEventListener('drop', e => loadFiles(e.dataTransfer.files));
+  drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
 
-  async function loadFiles(files) {
-    for (const f of files) {
+  async function addFiles(fileList) {
+    for (const f of fileList) {
       if (f.type !== 'text/plain') continue;
       store.set(f.name, (await f.text()).trim().split(/\r?\n/));
     }
     updateList(); dispatch();
   }
 
-  /* — category pills — */
-  async function populateCategories() {
-    catBar.innerHTML=''; selectedCats.clear();
-    try {
-      const manifest = await fetch(HF_BASE + MANIFEST_MAP[collSel.value]).then(r=>r.json());
-      [...new Set(manifest.map(e=>e.category.split('/').pop()))].sort()
-        .forEach(cat => {
-          const btn=document.createElement('div');
-          btn.textContent=cat; btn.className='cat-btn';
-          btn.onclick=()=>{ selectedCats.has(cat)
-            ? (selectedCats.delete(cat), btn.classList.remove('active'))
-            : (selectedCats.add(cat)   , btn.classList.add('active')); };
-          catBar.appendChild(btn);
-        });
-    } catch(e){console.warn('[cat]',e);}
+  /* ───────── manifest loader ───────── */
+  async function getManifest(collection) {
+    if (manifestCache[collection]) return manifestCache[collection];
+    const data = await fetch(HF_BASE + MANIFEST_MAP[collection]).then(r=>r.json());
+    manifestCache[collection] = data;
+    return data;
   }
-  collSel.addEventListener('change', populateCategories);
-  populateCategories();
 
-  /* — load defaults — */
+  /* ───────── category pills ───────── */
+  async function populateCategories() {
+    catBar.innerHTML=''; fileBar.innerHTML=''; selectedCats.clear(); selectedFiles.clear();
+    const manifest = await getManifest(collSel.value);
+    const cats = [...new Set(manifest.map(e=>e.category.split('/').pop()))].sort();
+
+    cats.forEach(cat => {
+      const pill = document.createElement('div');
+      pill.textContent = cat; pill.className = 'pill';
+      pill.onclick = () => {
+        if (selectedCats.has(cat)) {
+          selectedCats.delete(cat); pill.classList.remove('active');
+          if (fileBar.dataset.cat === cat) { fileBar.innerHTML=''; selectedFiles.clear(); }
+        } else {
+          selectedCats.add(cat); pill.classList.add('active');
+          populateFiles(cat, manifest);
+        }
+      };
+      catBar.appendChild(pill);
+    });
+  }
+
+  /* ───────── file pills ───────── */
+  function populateFiles(cat, manifest) {
+    fileBar.innerHTML=''; selectedFiles.clear();
+    fileBar.dataset.cat = cat;
+
+    manifest.filter(e => e.category.endsWith('/'+cat))
+            .forEach(e => {
+              const pill = document.createElement('div');
+              pill.textContent = e.name; pill.className = 'pill';
+              pill.onclick = () => {
+                if (selectedFiles.has(e.name)) {
+                  selectedFiles.delete(e.name); pill.classList.remove('active');
+                } else {
+                  selectedFiles.add(e.name); pill.classList.add('active');
+                }
+              };
+              fileBar.appendChild(pill);
+            });
+  }
+
+  collSel.addEventListener('change', populateCategories);
+  populateCategories();             // initial load
+
+  /* ───────── load defaults ───────── */
   loadBtn.onclick = async () => {
-    const wantAll = selectedCats.size===0;
-    const manifest = await fetch(HF_BASE + MANIFEST_MAP[collSel.value]).then(r=>r.json());
-    for (const {name,path,category} of manifest) {
-      const catLeaf=category.split('/').pop();
-      if (!wantAll && !selectedCats.has(catLeaf)) continue;
+    const coll   = collSel.value;
+    const manifest = await getManifest(coll);
+
+    const wantAllCats  = selectedCats.size === 0;
+    const wantAllFiles = selectedFiles.size === 0;
+
+    for (const { name, path, category } of manifest) {
+      const catLeaf = category.split('/').pop();
+
+      if (!wantAllCats && !selectedCats.has(catLeaf)) continue;
+      if (!wantAllFiles && !selectedFiles.has(name))  continue;
       if (store.has(name)) continue;
+
       const txt = await fetch(HF_BASE + path).then(r=>r.text());
       store.set(name, txt.trim().split(/\r?\n/));
     }
     updateList(); dispatch();
   };
 
-  /* — clear all — */
-  clearBtn.onclick = () => {
-    store.clear(); updateList(); dispatch();
-  };
+  /* ───────── clear all ───────── */
+  clearBtn.onclick = () => { store.clear(); updateList(); dispatch(); };
 </script>

@@ -40,3 +40,4 @@ pnpm-debug.log*
 *.tgz
 
 .secret
+netlify/functions/generatePrompt copy.js
