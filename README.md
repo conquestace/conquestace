@@ -26,7 +26,7 @@ I’m **Ashiful Bhuiyan** (aka **ConquestAce**). I do math and physics, develop 
 
 ## 🌐 Web & Links
 
-- 🌍 **Website**: [ashifulinstitute.com](https://ashiful.institute)
+- 🌍 **Website**: [ashiful.institute](https://ashiful.institute)
 - 🔗 **Portfolio**: [mathcodes.org](https://mathcodes.org)
 - 🧠 **Blog**: Coming Soon
 - 🐦 **Bluesky**: @conquestace.bsky.social
