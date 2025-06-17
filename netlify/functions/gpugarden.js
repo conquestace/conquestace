@@ -2,8 +2,9 @@ import fetch from "node-fetch";
 
 export async function handler(event) {
   try {
-    const input = JSON.parse(event.body).input;
-    const token = process.env.DEEPSEEK_API_KEY;
+    const { input, key } = JSON.parse(event.body || '{}');
+    const token = key;
+    if (!token) throw new Error('DeepSeek key required');
 
     const url = 'https://oui.gpu.garden/api/chat/completions';
     const headers = {
