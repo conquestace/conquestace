@@ -1,9 +1,11 @@
 export async function handler(event) {
   try {
-    const input = JSON.parse(event.body).input;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const { input, geminiKey } = JSON.parse(event.body);
+    if (!geminiKey) {
+      return { statusCode: 400, body: JSON.stringify({ text: 'geminiKey required.' }) };
+    }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`;
 
     const response = await fetch(url, {
       method: "POST",

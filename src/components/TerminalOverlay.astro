@@ -17,6 +17,12 @@
       <!-- Chat will be restored here -->
     </div>
 
+    <div class="space-y-2 mb-2">
+      <input id="geminiKeyTerm" type="password" class="w-full bg-slatecard p-1 rounded" placeholder="Gemini API Key" />
+      <input id="openaiKeyTerm" type="password" class="w-full bg-slatecard p-1 rounded" placeholder="OpenAI / Local API Key" />
+      <input id="llmUrlTerm" type="text" class="w-full bg-slatecard p-1 rounded" placeholder="Custom LLM URL" />
+    </div>
+
     <form id="console-form" class="flex gap-2">
       <span class="text-sky">hacker@conquestace.com</span>:~$
       <input
@@ -91,6 +97,9 @@
     const form = document.getElementById('console-form');
     const input = document.getElementById('console-input');
     const log = document.getElementById('console-log');
+    const gemKey = document.getElementById('geminiKeyTerm');
+    const openaiKey = document.getElementById('openaiKeyTerm');
+    const llmUrl = document.getElementById('llmUrlTerm');
 
     if (shouldClearHistory()) clearHistory();
     renderHistory(log);
@@ -131,7 +140,12 @@
         const response = await fetch("/.netlify/functions/llm-router", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages })
+          body: JSON.stringify({
+            messages,
+            geminiKey: gemKey.value.trim(),
+            openaiKey: openaiKey.value.trim(),
+            llmUrl: llmUrl.value.trim()
+          })
         });
 
         const data = await response.json();

@@ -2,17 +2,16 @@ import fetch from "node-fetch";
 
 export async function handler(event) {
   try {
-    const input = JSON.parse(event.body).input;
-    const token = process.env.DEEPSEEK_API_KEY;
+    const { input, openaiKey, llmUrl } = JSON.parse(event.body);
 
-    const url = 'https://oui.gpu.garden/api/chat/completions';
+    const url = llmUrl || 'https://api.openai.com/v1/chat/completions';
     const headers = {
-      'Authorization': `Bearer ${token}`,
+      'Authorization': `Bearer ${openaiKey || process.env.OPENAI_API_KEY}`,
       'Content-Type': 'application/json',
     };
 
     const data = {
-      model: 'gemma3:1b-it-fp16',
+      model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'system',

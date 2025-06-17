@@ -1,11 +1,11 @@
 import fetch from "node-fetch";
 
-const OUI_API_KEY = process.env.OUI_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 export async function handler(event) {
   try {
-    const { messages } = JSON.parse(event.body);
+    const { messages, geminiKey, openaiKey, llmUrl } = JSON.parse(event.body);
+    if (!geminiKey) {
+      return { statusCode: 400, body: JSON.stringify({ text: 'geminiKey required.' }) };
+    }
 
     const userInput = messages[messages.length - 1]?.content ?? "";
     const systemPrompt = {
@@ -15,51 +15,51 @@ export async function handler(event) {
 
 const fullMessages = [systemPrompt, ...messages];
 
-    // === 1. Try OpenUI with 5s timeout ===
+    // === 1. Try OpenAI or custom endpoint ===
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 5 seconds
-    
-      const ouiRes = await fetch("https://oui.gpu.garden/api/chat/completions", {
-        method: "POST",
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
+      const apiRes = await fetch(llmUrl || 'https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
         headers: {
-          Authorization: `Bearer ${OUI_API_KEY}`,
-          "Content-Type": "application/json"
+          'Authorization': `Bearer ${openaiKey || process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-        model: "gemma3:1b-it-fp16",
-        messages: fullMessages,
-        max_tokens: 1000,
-        top_p: 0.9,
-        temperature: 0.1,
-        presence_penalty: 0.5,
-        frequency_penalty: 0.5,
-        stop: ["INVALID QUERY", "BREAK"] // Add stop sequences here
+          model: 'gpt-3.5-turbo',
+          messages: fullMessages,
+          max_tokens: 1000,
+          top_p: 0.9,
+          temperature: 0.1,
+          presence_penalty: 0.5,
+          frequency_penalty: 0.5,
+          stop: ["INVALID QUERY", "BREAK"]
         }),
         signal: controller.signal
       });
 
       clearTimeout(timeout);
 
-      const contentType = ouiRes.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const errorText = await ouiRes.text();
-        throw new Error(`OpenUI returned non-JSON: ${errorText}`);
+      const contentType = apiRes.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const errorText = await apiRes.text();
+        throw new Error(`OpenAI returned non-JSON: ${errorText}`);
       }
 
-      const ouiData = await ouiRes.json();
-      const output = ouiData?.choices?.[0]?.message?.content;
+      const apiData = await apiRes.json();
+      const output = apiData?.choices?.[0]?.message?.content;
 
       if (output && output.trim()) {
         return {
           statusCode: 200,
-          body: JSON.stringify({ text: output, model: "openui-gemma3" })
+          body: JSON.stringify({ text: output, model: "openai" })
         };
       }
 
-      throw new Error("OpenUI returned no usable output.");
-    } catch (ouiErr) {
-      console.warn("[OpenUI fallback triggered]:", ouiErr.name === "AbortError" ? "Timeout after 5s" : ouiErr.message);
+      throw new Error("OpenAI returned no usable output.");
+    } catch (aiErr) {
+      console.warn("[OpenAI fallback triggered]:", aiErr.name === 'AbortError' ? 'Timeout after 5s' : aiErr.message);
     }
 
     // === 2. Gemini Fallback (REST) ===
@@ -71,7 +71,7 @@ const fullMessages = [systemPrompt, ...messages];
           : ` ${m.content}`
       ).join("\n");
 
-      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

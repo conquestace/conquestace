@@ -18,6 +18,23 @@
     </select>
   </label>
 
+  <!-- user keys / endpoints -->
+  <label class="font-medium text-white">Gemini API Key
+    <input id="geminiKey" type="password"
+           class="bg-slatecard p-1 rounded ml-2 w-full"
+           placeholder="required" />
+  </label>
+  <label class="font-medium text-white">OpenAI / Local API Key
+    <input id="openaiKey" type="password"
+           class="bg-slatecard p-1 rounded ml-2 w-full"
+           placeholder="defaults to server" />
+  </label>
+  <label class="font-medium text-white">Custom LLM URL
+    <input id="llmUrl" type="text"
+           class="bg-slatecard p-1 rounded ml-2 w-full"
+           placeholder="https://api.openai.com/v1/chat/completions" />
+  </label>
+
   <!-- send -->
   <button id="send-btn"
           class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40"
@@ -28,17 +45,25 @@
 
 <script is:client>
   /* element refs */
-  const btn   = document.getElementById('send-btn');
-  const notes = document.getElementById('llm-notes');
+  const btn       = document.getElementById('send-btn');
+  const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
+  const gemKey    = document.getElementById('geminiKey');
+  const openaiKey = document.getElementById('openaiKey');
+  const llmUrl    = document.getElementById('llmUrl');
 
   let initialPrompt = '';
 
   /* get initial prompt from PromptBuilder */
+  function updateBtn() {
+    btn.disabled = !(initialPrompt && gemKey.value.trim());
+  }
+
   window.addEventListener('initial-prompt', e => {
     initialPrompt = e.detail.trim();
-    btn.disabled = !initialPrompt;
+    updateBtn();
   });
+  gemKey.addEventListener('input', updateBtn);
 
   /* click → POST to Netlify function */
   btn.addEventListener('click', async () => {
@@ -52,8 +77,11 @@
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({
           initialPrompt,
-          preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim()  // <── extra textarea
+          preset       : presetSel.value,          // <── chosen preset
+          instructions : notes.value.trim(),       // <── extra textarea
+          geminiKey    : gemKey.value.trim(),
+          openaiKey    : openaiKey.value.trim(),
+          llmUrl       : llmUrl.value.trim()
         })
       });
 
