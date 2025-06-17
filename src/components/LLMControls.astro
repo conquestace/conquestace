@@ -18,6 +18,14 @@
     </select>
   </label>
 
+  <!-- Gemini API key -->
+  <label class="font-medium text-white">
+    Gemini API Key
+    <input id="geminiKey" type="password"
+           class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto"
+           placeholder="AIza..." />
+  </label>
+
   <!-- send -->
   <button id="send-btn"
           class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40"
@@ -31,18 +39,29 @@
   const btn   = document.getElementById('send-btn');
   const notes = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
+  const gemKey = document.getElementById('geminiKey');
+
+  function loadConfig() {
+    try { return JSON.parse(localStorage.getItem('llmConfig') || '{}'); }
+    catch { return {}; }
+  }
+
+  function update() {
+    btn.disabled = !initialPrompt || !gemKey.value.trim();
+  }
 
   let initialPrompt = '';
 
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
     initialPrompt = e.detail.trim();
-    btn.disabled = !initialPrompt;
+    update();
   });
+  gemKey.addEventListener('input', update);
 
   /* click → POST to Netlify function */
   btn.addEventListener('click', async () => {
-    if (!initialPrompt) return;
+    if (!initialPrompt || !gemKey.value.trim()) return;
     btn.disabled = true;
     post('🚀 Sending to LLM…');
 
@@ -53,7 +72,9 @@
         body   : JSON.stringify({
           initialPrompt,
           preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim()  // <── extra textarea
+          instructions: notes.value.trim(), // <── extra textarea
+          geminiKey: gemKey.value.trim(),
+          llmConfig: loadConfig()          // selected provider + model
         })
       });
 

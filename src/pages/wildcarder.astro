@@ -3,12 +3,16 @@ import BaseLayout     from '../layouts/BaseLayout.astro';
 import WildcardLoader from '../components/WildcardLoader.astro';
 import PromptBuilder  from '../components/PromptBuilder.astro';
 import LLMControls    from '../components/LLMControls.astro';
+import LLMConfigurator from '../components/LLMConfigurator.astro';
 import TerminalOutput from '../components/TerminalOutput.astro';
 import PromptSaver    from '../components/PromptSaver.astro';
 ---
 
 <BaseLayout title="Wildcard Prompt Generator">
   <div class="p-6 max-w-3xl mx-auto font-mono space-y-8">
+
+    <!-- configure llm -->
+    <LLMConfigurator />
 
     <!-- 1. defaults + drag-drop -->
     <WildcardLoader />

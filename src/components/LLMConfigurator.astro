@@ -1,0 +1,73 @@
+---
+---
+<div class="mb-4" data-llm-config>
+  <button id="llm-config-btn" class="bg-slatecard text-lightblue px-2 py-1 rounded">⚙️ Configure LLM</button>
+  <div id="llm-config-panel" class="hidden mt-2 p-4 bg-slatecard rounded border border-slategray space-y-3 max-w-sm">
+    <label class="font-medium text-white flex items-center gap-2">
+      Provider
+      <select id="llm-provider" class="bg-midnight text-white p-1 rounded flex-1">
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+        <option value="local">Local</option>
+      </select>
+    </label>
+    <label class="font-medium text-white flex items-center gap-2">
+      Model
+      <input id="llm-model" type="text" class="bg-midnight text-white p-1 rounded flex-1" placeholder="gpt-3.5-turbo" />
+    </label>
+    <label id="local-url-wrap" class="hidden font-medium text-white flex items-center gap-2">
+      URL
+      <input id="local-url" type="text" class="bg-midnight text-white p-1 rounded flex-1" placeholder="http://localhost:1234" />
+    </label>
+    <label id="local-key-wrap" class="hidden font-medium text-white flex items-center gap-2">
+      Key
+      <input id="local-key" type="password" class="bg-midnight text-white p-1 rounded flex-1" />
+    </label>
+    <button id="llm-config-save" class="bg-green-700 text-white px-3 py-1 rounded">Save</button>
+  </div>
+</div>
+
+<script is:client>
+  const btn = document.getElementById('llm-config-btn');
+  const panel = document.getElementById('llm-config-panel');
+  const providerSel = document.getElementById('llm-provider');
+  const modelInput = document.getElementById('llm-model');
+  const urlWrap = document.getElementById('local-url-wrap');
+  const keyWrap = document.getElementById('local-key-wrap');
+  const urlInput = document.getElementById('local-url');
+  const keyInput = document.getElementById('local-key');
+  const saveBtn = document.getElementById('llm-config-save');
+
+  function load() {
+    const cfg = JSON.parse(localStorage.getItem('llmConfig') || '{}');
+    providerSel.value = cfg.provider || 'openai';
+    modelInput.value = cfg.model || (cfg.provider === 'gemini' ? 'gemini-2.0-pro' : 'gpt-3.5-turbo');
+    urlInput.value = cfg.localUrl || '';
+    keyInput.value = cfg.localKey || '';
+    toggle();
+  }
+
+  function toggle() {
+    const isLocal = providerSel.value === 'local';
+    urlWrap.style.display = isLocal ? '' : 'none';
+    keyWrap.style.display = isLocal ? '' : 'none';
+  }
+
+  btn.addEventListener('click', () => {
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) load();
+  });
+
+  providerSel.addEventListener('change', toggle);
+
+  saveBtn.addEventListener('click', () => {
+    const cfg = {
+      provider: providerSel.value,
+      model: modelInput.value.trim(),
+      localUrl: urlInput.value.trim(),
+      localKey: keyInput.value.trim()
+    };
+    localStorage.setItem('llmConfig', JSON.stringify(cfg));
+    panel.classList.add('hidden');
+  });
+</script>
