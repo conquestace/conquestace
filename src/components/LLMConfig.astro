@@ -1,0 +1,100 @@
+---
+/* components/LLMConfig.astro */
+---
+
+<button id="llm-open" class="bg-mathblue text-white px-3 py-1 rounded">⚙️ Configure LLM</button>
+
+<div id="llm-overlay" class="hidden fixed inset-0 z-50 bg-[#000000cc] backdrop-blur-sm flex items-center justify-center">
+  <div class="bg-slatecard p-4 rounded w-[90%] max-w-md text-lightblue space-y-4 font-mono">
+    <h2 class="text-white text-lg">LLM Configuration</h2>
+
+    <label class="block">Provider
+      <select id="llm-provider" class="bg-slatecard p-1 rounded ml-2">
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+        <option value="local">Local</option>
+      </select>
+    </label>
+
+    <label class="block">Model
+      <input id="llm-model" type="text" placeholder="gpt-3.5-turbo"
+             class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" />
+    </label>
+
+    <div id="gemini-field" class="space-y-2 hidden">
+      <label class="block">Gemini API Key
+        <input id="gemini-key" type="password" placeholder="AIza..."
+               class="bg-slatecard p-1 rounded ml-2 w-full" />
+      </label>
+    </div>
+
+    <div id="local-fields" class="space-y-2 hidden">
+      <label class="block">Endpoint URL
+        <input id="local-url" type="text" placeholder="http://127.0.0.1:8000/v1/chat/completions"
+               class="bg-slatecard p-1 rounded ml-2 w-full" />
+      </label>
+      <label class="block">Auth Key
+        <input id="local-key" type="text" class="bg-slatecard p-1 rounded ml-2 w-full" />
+      </label>
+    </div>
+
+    <div class="flex justify-end gap-2">
+      <button id="llm-save"   class="bg-green-700 text-white px-3 py-1 rounded">Save</button>
+      <button id="llm-cancel" class="bg-slategray text-white px-3 py-1 rounded">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script is:client>
+  const openBtn    = document.getElementById('llm-open');
+  const overlay    = document.getElementById('llm-overlay');
+  const provider   = document.getElementById('llm-provider');
+  const model      = document.getElementById('llm-model');
+  const gemField   = document.getElementById('gemini-field');
+  const gemKey     = document.getElementById('gemini-key');
+  const localWrap  = document.getElementById('local-fields');
+  const localUrl   = document.getElementById('local-url');
+  const localKey   = document.getElementById('local-key');
+  const saveBtn    = document.getElementById('llm-save');
+  const cancelBtn  = document.getElementById('llm-cancel');
+
+  function load() {
+    const conf = JSON.parse(localStorage.getItem('llmConfig') || '{}');
+    provider.value  = conf.provider || 'openai';
+    model.value     = conf.model   || '';
+    gemKey.value    = conf.geminiKey || '';
+    localUrl.value  = conf.localUrl || '';
+    localKey.value  = conf.localKey || '';
+    updateFields();
+  }
+
+  function updateFields() {
+    gemField.classList.toggle('hidden', provider.value !== 'gemini');
+    localWrap.classList.toggle('hidden', provider.value !== 'local');
+  }
+
+  function save() {
+    const conf = {
+      provider : provider.value,
+      model    : model.value.trim(),
+      geminiKey: gemKey.value.trim(),
+      localUrl : localUrl.value.trim(),
+      localKey : localKey.value.trim()
+    };
+    localStorage.setItem('llmConfig', JSON.stringify(conf));
+    window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: conf }));
+    overlay.classList.add('hidden');
+  }
+
+  openBtn.addEventListener('click', () => {
+    load();
+    overlay.classList.remove('hidden');
+  });
+  cancelBtn.addEventListener('click', () => overlay.classList.add('hidden'));
+  provider.addEventListener('change', updateFields);
+  saveBtn.addEventListener('click', save);
+
+  // initial config dispatch
+  load();
+  window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: JSON.parse(localStorage.getItem('llmConfig') || '{}') }));
+</script>
