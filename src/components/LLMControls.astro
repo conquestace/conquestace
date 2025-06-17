@@ -8,6 +8,12 @@
   <textarea id="llm-notes" rows="3"
             class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
 
+  <!-- gemini api key -->
+  <label class="font-medium text-white">
+    Gemini API key
+    <input id="gemini-key" type="password" class="bg-slatecard p-1 rounded ml-2" />
+  </label>
+
   <!-- preset selector -->
   <label class="font-medium text-white">
     System-prompt preset
@@ -28,9 +34,15 @@
 
 <script is:client>
   /* element refs */
-  const btn   = document.getElementById('send-btn');
-  const notes = document.getElementById('llm-notes');
+  const btn       = document.getElementById('send-btn');
+  const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
+  const gemKeyInp = document.getElementById('gemini-key');
+
+  gemKeyInp.value = localStorage.getItem('geminiKey') || '';
+  gemKeyInp.addEventListener('input', () => {
+    localStorage.setItem('geminiKey', gemKeyInp.value.trim());
+  });
 
   let initialPrompt = '';
 
@@ -53,7 +65,8 @@
         body   : JSON.stringify({
           initialPrompt,
           preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim()  // <── extra textarea
+          instructions: notes.value.trim(), // <── extra textarea
+          geminiKey: gemKeyInp.value.trim()
         })
       });
 

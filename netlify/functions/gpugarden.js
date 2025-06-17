@@ -3,16 +3,17 @@ import fetch from "node-fetch";
 export async function handler(event) {
   try {
     const input = JSON.parse(event.body).input;
-    const token = process.env.DEEPSEEK_API_KEY;
+    const token = process.env.OPENAI_API_KEY;
+    const base  = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
 
-    const url = 'https://oui.gpu.garden/api/chat/completions';
+    const url = `${base.replace(/\/$/, '')}/chat/completions`;
     const headers = {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
 
     const data = {
-      model: 'gemma3:1b-it-fp16',
+      model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'system',
@@ -40,7 +41,7 @@ export async function handler(event) {
       body: JSON.stringify({ text: output })
     };
   } catch (err) {
-    console.error("DeepSeek handler error:", err);
+    console.error("OpenAI handler error:", err);
     return {
       statusCode: 500,
       body: JSON.stringify({ text: "Error: " + err.message })

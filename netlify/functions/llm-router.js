@@ -1,7 +1,8 @@
 import fetch from "node-fetch";
 
-const OUI_API_KEY = process.env.OUI_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const OPENAI_API_KEY  = process.env.OPENAI_API_KEY;
+const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
+const GEMINI_API_KEY  = process.env.GEMINI_API_KEY;
 
 export async function handler(event) {
   try {
@@ -15,51 +16,47 @@ export async function handler(event) {
 
 const fullMessages = [systemPrompt, ...messages];
 
-    // === 1. Try OpenUI with 5s timeout ===
+    // === 1. Try OpenAI first ===
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 5 seconds
-    
-      const ouiRes = await fetch("https://oui.gpu.garden/api/chat/completions", {
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
+      const aiRes = await fetch(`${OPENAI_BASE_URL.replace(/\/$/, '')}/chat/completions`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${OUI_API_KEY}`,
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-        model: "gemma3:1b-it-fp16",
+        model: "gpt-3.5-turbo",
         messages: fullMessages,
         max_tokens: 1000,
-        top_p: 0.9,
-        temperature: 0.1,
-        presence_penalty: 0.5,
-        frequency_penalty: 0.5,
-        stop: ["INVALID QUERY", "BREAK"] // Add stop sequences here
+        temperature: 0.1
         }),
         signal: controller.signal
       });
 
       clearTimeout(timeout);
 
-      const contentType = ouiRes.headers.get("content-type");
+      const contentType = aiRes.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        const errorText = await ouiRes.text();
-        throw new Error(`OpenUI returned non-JSON: ${errorText}`);
+        const errorText = await aiRes.text();
+        throw new Error(`OpenAI returned non-JSON: ${errorText}`);
       }
 
-      const ouiData = await ouiRes.json();
-      const output = ouiData?.choices?.[0]?.message?.content;
+      const aiData = await aiRes.json();
+      const output = aiData?.choices?.[0]?.message?.content;
 
       if (output && output.trim()) {
         return {
           statusCode: 200,
-          body: JSON.stringify({ text: output, model: "openui-gemma3" })
+          body: JSON.stringify({ text: output, model: "openai" })
         };
       }
 
-      throw new Error("OpenUI returned no usable output.");
-    } catch (ouiErr) {
-      console.warn("[OpenUI fallback triggered]:", ouiErr.name === "AbortError" ? "Timeout after 5s" : ouiErr.message);
+      throw new Error("OpenAI returned no usable output.");
+    } catch (aiErr) {
+      console.warn("[OpenAI fallback triggered]:", aiErr.name === "AbortError" ? "Timeout after 5s" : aiErr.message);
     }
 
     // === 2. Gemini Fallback (REST) ===
