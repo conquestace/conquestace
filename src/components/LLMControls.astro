@@ -3,6 +3,13 @@
 ---
 
 <div class="flex flex-col gap-4" data-llm>
+  <!-- gemini key input -->
+  <label class="font-medium text-white">
+    Gemini API key
+    <input id="geminiKey" type="password"
+           class="bg-slatecard p-1 rounded ml-2 w-56"
+           placeholder="AIza..." />
+  </label>
   <!-- free-form additions -->
   <label class="font-medium text-white">📄 Extra instructions to the LLM</label>
   <textarea id="llm-notes" rows="3"
@@ -31,18 +38,30 @@
   const btn   = document.getElementById('send-btn');
   const notes = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
+  const gemKeyInput = document.getElementById('geminiKey');
+
+  // restore key from localStorage if available
+  gemKeyInput.value = localStorage.getItem('geminiKey') || '';
+  gemKeyInput.addEventListener('input', () => {
+    localStorage.setItem('geminiKey', gemKeyInput.value.trim());
+    btn.disabled = !(initialPrompt && gemKeyInput.value.trim());
+  });
 
   let initialPrompt = '';
 
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
     initialPrompt = e.detail.trim();
-    btn.disabled = !initialPrompt;
+    btn.disabled = !(initialPrompt && gemKeyInput.value.trim());
   });
 
   /* click → POST to Netlify function */
   btn.addEventListener('click', async () => {
     if (!initialPrompt) return;
+    if (!gemKeyInput.value.trim()) {
+      post('❌ Gemini API key required.');
+      return;
+    }
     btn.disabled = true;
     post('🚀 Sending to LLM…');
 
@@ -53,7 +72,8 @@
         body   : JSON.stringify({
           initialPrompt,
           preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim()  // <── extra textarea
+          instructions: notes.value.trim(), // <── extra textarea
+          geminiKey: gemKeyInput.value.trim()
         })
       });
 

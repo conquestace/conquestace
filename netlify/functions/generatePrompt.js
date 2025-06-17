@@ -69,7 +69,7 @@ export const handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return bad('Invalid JSON payload.'); }
 
-  const { initialPrompt, preset = 'default', instructions = '' } = body;
+  const { initialPrompt, preset = 'default', instructions = '', geminiKey = '' } = body;
   if (!initialPrompt?.trim()) return bad('initialPrompt missing.');
 
   /* 2 ─ content-policy gate ------------------------------------------- */
@@ -89,41 +89,44 @@ export const handler = async (event) => {
     { role: 'user',   content: initialPrompt }
   ];
 
-  /* 4 ─ OpenUI (Gemma-3 primary) -------------------------------------- */
+  /* 4 ─ OpenAI (primary) or local LLM ------------------------------- */
   try {
-    const ouiRes = await fetch(
-      'https://oui.gpu.garden/api/chat/completions',
-      {
-        method : 'POST',
-        headers: {
-          Authorization : `Bearer ${process.env.OUI_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'gemma3:1b-it-fp16',
-          messages,
-          max_tokens: 1024
-        }),
-        signal: AbortSignal.timeout?.(30_000)
-      }
-    );
+    const url = process.env.LOCAL_LLM_URL || 'https://api.openai.com/v1/chat/completions';
+    const headers = { 'Content-Type': 'application/json' };
+    if (process.env.LOCAL_LLM_URL) {
+      if (process.env.LOCAL_LLM_AUTH) headers['Authorization'] = process.env.LOCAL_LLM_AUTH;
+    } else {
+      headers['Authorization'] = `Bearer ${process.env.OPENAI_API_KEY}`;
+    }
 
-    if (ouiRes.ok) {
-      const data = await ouiRes.json();
+    const oaRes = await fetch(url, {
+      method : 'POST',
+      headers,
+      body   : JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages,
+        max_tokens: 1024
+      }),
+      signal: AbortSignal.timeout?.(30_000)
+    });
+
+    if (oaRes.ok) {
+      const data = await oaRes.json();
       const txt  = data?.choices?.[0]?.message?.content?.trim();
       if (txt) return ok(txt);
     } else {
-      console.warn('[OpenUI] HTTP', ouiRes.status);
+      console.warn('[OpenAI/local] HTTP', oaRes.status);
     }
   } catch (err) {
-    console.warn('[OpenUI error]', err.message);
+    console.warn('[OpenAI/local error]', err.message);
   }
 
   /* 5 ─ Gemini-Flash fallback ----------------------------------------- */
   try {
+    if (!geminiKey) return fail('Gemini API key required.');
     const url =
       'https://generativelanguage.googleapis.com/v1beta/models/' +
-      'gemini-2.0-flash:generateContent?key=' + process.env.GEMINI_API_KEY;
+      'gemini-2.0-flash:generateContent?key=' + geminiKey;
 
     const gRes = await fetch(url, {
       method : 'POST',

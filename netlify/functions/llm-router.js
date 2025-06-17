@@ -1,7 +1,9 @@
 import fetch from "node-fetch";
 
-const OUI_API_KEY = process.env.OUI_API_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const LOCAL_LLM_URL  = process.env.LOCAL_LLM_URL;
+const LOCAL_LLM_AUTH = process.env.LOCAL_LLM_AUTH;
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function handler(event) {
   try {
@@ -15,51 +17,45 @@ export async function handler(event) {
 
 const fullMessages = [systemPrompt, ...messages];
 
-    // === 1. Try OpenUI with 5s timeout ===
+    // === 1. Try OpenAI or local LLM ===
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000); // 5 seconds
-    
-      const ouiRes = await fetch("https://oui.gpu.garden/api/chat/completions", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${OUI_API_KEY}`,
-          "Content-Type": "application/json"
-        },
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
+      const url = LOCAL_LLM_URL || 'https://api.openai.com/v1/chat/completions';
+      const headers = { 'Content-Type': 'application/json' };
+      if (LOCAL_LLM_URL) {
+        if (LOCAL_LLM_AUTH) headers['Authorization'] = LOCAL_LLM_AUTH;
+      } else {
+        headers['Authorization'] = `Bearer ${OPENAI_API_KEY}`;
+      }
+
+      const oaRes = await fetch(url, {
+        method: 'POST',
+        headers,
         body: JSON.stringify({
-        model: "gemma3:1b-it-fp16",
-        messages: fullMessages,
-        max_tokens: 1000,
-        top_p: 0.9,
-        temperature: 0.1,
-        presence_penalty: 0.5,
-        frequency_penalty: 0.5,
-        stop: ["INVALID QUERY", "BREAK"] // Add stop sequences here
+          model: 'gpt-3.5-turbo',
+          messages: fullMessages,
+          max_tokens: 1000
         }),
         signal: controller.signal
       });
 
       clearTimeout(timeout);
 
-      const contentType = ouiRes.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const errorText = await ouiRes.text();
-        throw new Error(`OpenUI returned non-JSON: ${errorText}`);
-      }
+      const data = await oaRes.json();
+      const output = data?.choices?.[0]?.message?.content;
 
-      const ouiData = await ouiRes.json();
-      const output = ouiData?.choices?.[0]?.message?.content;
-
-      if (output && output.trim()) {
+      if (oaRes.ok && output && output.trim()) {
         return {
           statusCode: 200,
-          body: JSON.stringify({ text: output, model: "openui-gemma3" })
+          body: JSON.stringify({ text: output, model: LOCAL_LLM_URL ? 'local' : 'openai' })
         };
       }
 
-      throw new Error("OpenUI returned no usable output.");
-    } catch (ouiErr) {
-      console.warn("[OpenUI fallback triggered]:", ouiErr.name === "AbortError" ? "Timeout after 5s" : ouiErr.message);
+      throw new Error('OpenAI/local returned no usable output.');
+    } catch (oaErr) {
+      console.warn('[OpenAI/local fallback]:', oaErr.name === 'AbortError' ? 'Timeout after 5s' : oaErr.message);
     }
 
     // === 2. Gemini Fallback (REST) ===

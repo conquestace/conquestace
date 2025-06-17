@@ -34,7 +34,7 @@ Source ➜ [`src/pages/newtab.astro`](./src/pages/newtab.astro) + [`src/script
 
 A full‑screen **AI terminal interface** that responds in cryptic, hacker‑style prose.
 
-- **OpenUI Gemma‑3** primary LLM (via `/api/chat/completions`).
+- **OpenAI ChatGPT** primary LLM.
 - **Gemini 2 Flash** fallback after 5 s timeout.
 - **Streaming output** rendered with a faux CRT scan‑line effect, cursor blink, and occasional *ASCII corruption*.
 - Accepts site navigation commands (`help`, `goto /wildcarder`, etc.) and forwards unknown input to the LLM.
@@ -43,7 +43,7 @@ A full‑screen **AI terminal interface** that responds in cryptic, hacker‑sty
 
 ## Wildcarder 🃏 — Prompt-Builder UI
 
-A lightweight Astro-powered tool for turning **wildcard `.txt` files** into **refined, LLM-ready prompts** — built with modular UI islands, prompt saving, content moderation, and dynamic Hugging Face wildcard ingestion.
+A lightweight Astro-powered tool for turning **wildcard `.txt` files** into **refined, LLM-ready prompts** — built with modular UI islands, prompt saving, content moderation, and dynamic Hugging Face wildcard ingestion. It now requires you to provide your own **Gemini API key** for LLM access.
 
 ---
 
@@ -55,7 +55,7 @@ A lightweight Astro-powered tool for turning **wildcard `.txt` files** into **re
 | `PromptBuilder.astro`                 | Builds the **initial prompt** by randomly sampling lines from selected wildcards.<br>• User controls sample count per file.<br>• Supports **🔄 Re-roll**, manual editing, and live broadcasting via `initial-prompt`.                                                                                                                                                                                                                                                                                                                     |
 | `LLMControls.astro`                   | Sends prompt + instructions to the backend:<br>• Optional **extra instructions** textarea.<br>• Choose from **system prompt presets** (`danbooru`, `natural-language`, future).<br>• POSTs everything to `/.netlify/functions/generatePrompt`.                                                                                                                                                                                                                                                                                             |
 | `PromptSaver.astro`                  | Local prompt memory:<br>• Save most recent LLM output 📌<br>• View full list 📜<br>• Download all as `prompts.txt` ⬇️<br>• Clear saved prompts 🗑️<br>• Button state updates automatically based on interaction.<br>• No backend; all browser-local.                                                                                                                                                                                                                                                   |
-| `netlify/functions/generatePrompt.js` | • Configurable `SYSTEM_PRESETS` (e.g., Danbooru / NL)<br>• **OpenAI Moderation API** with per-category probability thresholds (`BLOCK_THRESHOLDS`)<br>• Blocks only flagged categories exceeding your explicitness thresholds (e.g., allow sensitive/questionable, block explicit/minors).<br>• Sends clean prompts to **Gemma-3 via OpenUI**<br>• Auto-fallback to **Gemini 2 Flash** if Gemma fails.                                                                                                                                                       |
+| `netlify/functions/generatePrompt.js` | • Configurable `SYSTEM_PRESETS` (e.g., Danbooru / NL)<br>• **OpenAI Moderation API** with per-category probability thresholds (`BLOCK_THRESHOLDS`)<br>• Blocks only flagged categories exceeding your explicitness thresholds (e.g., allow sensitive/questionable, block explicit/minors).<br>• Sends clean prompts to **OpenAI ChatGPT (or your `LOCAL_LLM_URL`)**<br>• Auto-fallback to **Gemini 2 Flash**.                                                                                                                                                       |
 
 ---
 
@@ -108,7 +108,7 @@ Supports:
 
   * Runs **OpenAI Moderation API**
   * Checks per-category **probability scores** via `BLOCK_THRESHOLDS`
-  * Sends safe prompt to **Gemma-3 (OpenUI)** or **Gemini 2 Flash** fallback
+  * Sends safe prompt to **OpenAI ChatGPT** (or your `LOCAL_LLM_URL`) with **Gemini 2 Flash** fallback
 
 ---
 
@@ -150,16 +150,17 @@ netlify dev
 
 Set the following environment variables in `.env` or Netlify:
 
-* `OUI_API_KEY` — for Gemma 3 (OpenUI)
-* `GEMINI_API_KEY` — for Gemini fallback
-* `OPENAI_API_KEY` — for moderation scoring
+* `OPENAI_API_KEY` — for OpenAI requests and moderation
+* `LOCAL_LLM_URL`  — optional custom chat completion endpoint
+* `LOCAL_LLM_AUTH` — optional auth header for the local LLM
+* `GEMINI_API_KEY` — (TerminalOverlay only) fallback Gemini key
 
 ---
 
 ## 🤝 Credits
 
 * Wildcard dataset: [ConquestAce/wildcards](https://huggingface.co/datasets/ConquestAce/wildcards)
-* OpenUI Gemma-3: `gemma3:1b-it-fp16`
+* OpenAI ChatGPT (`gpt-3.5-turbo`)
 * Google Gemini 2 Flash fallback
 * Moderation via OpenAI `/moderations` endpoint
 
