@@ -18,6 +18,7 @@
     </select>
   </label>
 
+
   <!-- send -->
   <button id="send-btn"
           class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40"
@@ -32,17 +33,30 @@
   const notes = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
 
+  let llmConfig = {};
+
+  function update() {
+    const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
+    btn.disabled = !initialPrompt || needsKey;
+  }
+
   let initialPrompt = '';
 
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
     initialPrompt = e.detail.trim();
-    btn.disabled = !initialPrompt;
+    update();
+  });
+
+  window.addEventListener('llm-config-changed', e => {
+    llmConfig = e.detail || {};
+    update();
   });
 
   /* click → POST to Netlify function */
   btn.addEventListener('click', async () => {
-    if (!initialPrompt) return;
+    const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
+    if (!initialPrompt || needsKey) return;
     btn.disabled = true;
     post('🚀 Sending to LLM…');
 
@@ -53,7 +67,8 @@
         body   : JSON.stringify({
           initialPrompt,
           preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim()  // <── extra textarea
+          instructions: notes.value.trim(), // <── extra textarea
+          llm: llmConfig
         })
       });
 
