@@ -34,8 +34,7 @@ Source ➜ [`src/pages/newtab.astro`](./src/pages/newtab.astro) + [`src/script
 
 A full‑screen **AI terminal interface** that responds in cryptic, hacker‑style prose.
 
-- **OpenAI** (or local) primary LLM via `/chat/completions`.
-- **Gemini 2 Flash** fallback after 5 s timeout.
+- Choose **OpenAI**, **Gemini**, or a custom local endpoint.
 - **Streaming output** rendered with a faux CRT scan‑line effect, cursor blink, and occasional *ASCII corruption*.
 - Accepts site navigation commands (`help`, `goto /wildcarder`, etc.) and forwards unknown input to the LLM.
 - Source ➜ [`src/components/TerminalOverlay.astro`](./src/components/TerminalOverlay.astro)
@@ -56,7 +55,7 @@ A lightweight Astro-powered tool for turning **wildcard `.txt` files** into **re
 | `LLMConfig.astro`                     | Button to configure your LLM choice (**OpenAI**, **Gemini**, or **Local**).<br>• Lets you set model name, keys, and endpoint.<br>• Can store an **OpenAI API key** and custom **system prompt**.<br>• Saved in `localStorage`.
 | `LLMControls.astro`                   | Sends prompt + instructions to the backend:<br>• Optional **extra instructions** textarea.<br>• Choose from **system prompt presets** (`danbooru`, `natural-language`, future).<br>• POSTs everything to `/.netlify/functions/generatePrompt` using your `LLMConfig` settings.
 | `PromptSaver.astro`                  | Local prompt memory:<br>• Save most recent LLM output 📌<br>• View full list 📜<br>• Download all as `prompts.txt` ⬇️<br>• Clear saved prompts 🗑️<br>• Button state updates automatically based on interaction.<br>• No backend; all browser-local.                                                                                                                                                                                                                                                   |
-| `netlify/functions/generatePrompt.js` | • Configurable `SYSTEM_PRESETS` (e.g., Danbooru / NL)<br>• **OpenAI Moderation API** with per-category probability thresholds (`BLOCK_THRESHOLDS`)<br>• Blocks only flagged categories exceeding your explicitness thresholds (e.g., allow sensitive/questionable, block explicit/minors).<br>• Sends prompts to **OpenAI** or a custom `LOCAL_LLM_URL`<br>• Auto-fallback to **Gemini 2 Flash** if primary LLM fails.                                                                                                                                                       |
+| `netlify/functions/generatePrompt.js` | • Configurable `SYSTEM_PRESETS` (e.g., Danbooru / NL)<br>• **OpenAI Moderation API** with per-category probability thresholds (`BLOCK_THRESHOLDS`)<br>• Blocks only flagged categories exceeding your explicitness thresholds (e.g., allow sensitive/questionable, block explicit/minors).<br>• Sends prompts to **OpenAI**, **Gemini**, or a custom `LOCAL_LLM_URL` based on your settings.
 
 ---
 
@@ -109,7 +108,7 @@ Supports:
 
   * Runs **OpenAI Moderation API**
   * Checks per-category **probability scores** via `BLOCK_THRESHOLDS`
-  * Sends safe prompt to **OpenAI** (or custom LLM) with **Gemini 2 Flash** fallback
+  * Sends safe prompt to **OpenAI** (or custom LLM)
 
 ---
 
@@ -148,13 +147,7 @@ npm run dev
 # Run Netlify Functions locally
 netlify dev
 ```
-
-Set the following environment variables in `.env` or Netlify:
-
-* `OPENAI_API_KEY` — for OpenAI calls and moderation (can be overridden via `LLMConfig`)
-* `LOCAL_LLM_URL`  — optional custom LLM endpoint
-* `LOCAL_LLM_KEY`  — auth token for the custom endpoint
-* `GEMINI_API_KEY` — for Gemini fallback in TerminalOverlay
+Provide any required API keys through the **LLM Configuration** dialog in the UI. No `.env` file is used.
 
 ---
 
@@ -162,7 +155,7 @@ Set the following environment variables in `.env` or Netlify:
 
 * Wildcard dataset: [ConquestAce/wildcards](https://huggingface.co/datasets/ConquestAce/wildcards)
 * OpenAI GPT models
-* Google Gemini 2 Flash fallback
+* Google Gemini 2 Flash
 * Moderation via OpenAI `/moderations` endpoint
 
 ---

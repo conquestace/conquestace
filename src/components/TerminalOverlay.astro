@@ -128,10 +128,11 @@
       messages.push({ role: "user", content: userInput });
 
       try {
+        const llmConf = JSON.parse(localStorage.getItem('llmConfig') || '{}');
         const response = await fetch("/.netlify/functions/llm-router", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages })
+          body: JSON.stringify({ messages, llm: llmConf })
         });
 
         const data = await response.json();

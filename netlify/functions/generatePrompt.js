@@ -33,13 +33,14 @@ const BLOCK_THRESHOLDS = {
   self_harm            : 0.50    // intent or instructions
 };
 
-async function violatesPolicy(text) {
+async function violatesPolicy(text, openaiKey) {
+  if (!openaiKey) return false;       // no key → skip moderation
   try {
     const res = await fetch('https://api.openai.com/v1/moderations', {
       method : 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${openaiKey}`
       },
       body: JSON.stringify({ input: text, model: 'omni-moderation-latest' })
     });
@@ -76,7 +77,7 @@ export const handler = async (event) => {
 
   /* 2 ─ content-policy gate ------------------------------------------- */
   const combinedInput = `${initialPrompt}\n\n${instructions}`;
-  if (await violatesPolicy(combinedInput)) {
+  if (await violatesPolicy(combinedInput, config.openaiKey)) {
     return bad('Prompt rejected by content policy.');
   }
 
@@ -98,18 +99,52 @@ export const handler = async (event) => {
 
   const model = config.model || (provider === 'gemini'
     ? 'gemini-2.0-flash'
-    : process.env.OPENAI_MODEL || 'gpt-3.5-turbo');
+    : 'GPT-4o mini');
 
-  if (provider !== 'gemini') {
+  if (provider === 'gemini') {
+    /* 4 ─ Gemini request ----------------------------------------------- */
+    try {
+      const key = config.geminiKey;
+      if (!key) return fail('Gemini key required.');
+      const url =
+        'https://generativelanguage.googleapis.com/v1beta/models/' +
+        `${model}:generateContent?key=` + key;
+
+      const gRes = await fetch(url, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [ { parts: [{ text: initialPrompt.trim() }] } ],
+          generationConfig: { maxOutputTokens: 512 }
+        })
+      });
+
+      if (!gRes.ok) {
+        const errTxt = await gRes.text().catch(() => '');
+        return fail(`Gemini HTTP ${gRes.status}: ${errTxt.slice(0,200)}`);
+      }
+
+      const data = await gRes.json();
+      const txt  = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (txt) return ok(txt);
+
+      const reason = data?.promptFeedback?.blockReason || 'unknown';
+      return fail(`Gemini produced no text – block reason: ${reason}`);
+    } catch (err) {
+      return fail('Gemini request failed: ' + err.message);
+    }
+  } else {
     /* 4 ─ OpenAI or local primary ------------------------------------ */
     try {
       const url = provider === 'local'
-        ? (config.localUrl || process.env.LOCAL_LLM_URL)
+        ? config.localUrl
         : 'https://api.openai.com/v1/chat/completions';
       const apiKey = provider === 'local'
-        ? (config.localKey || process.env.LOCAL_LLM_KEY)
-        : (config.openaiKey || process.env.OPENAI_API_KEY);
-
+        ? config.localKey
+        : config.openaiKey;
+      if (provider !== 'local' && !apiKey) return fail('OpenAI key required.');
+      
       const aiRes = await fetch(url, {
         method : 'POST',
         headers: {
@@ -131,41 +166,9 @@ export const handler = async (event) => {
       } else {
         console.warn('[LLM] HTTP', aiRes.status);
       }
+      return fail('OpenAI produced no text.');
     } catch (err) {
-      console.warn('[LLM error]', err.message);
+      return fail('LLM request failed: ' + err.message);
     }
-  }
-
-  /* 5 ─ Gemini request ----------------------------------------------- */
-  try {
-    const key = config.geminiKey;
-    if (!key) return fail('Gemini key required.');
-    const url =
-      'https://generativelanguage.googleapis.com/v1beta/models/' +
-      `${model}:generateContent?key=` + key;
-
-    const gRes = await fetch(url, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [ { parts: [{ text: initialPrompt.trim() }] } ],
-        generationConfig: { maxOutputTokens: 512 }
-      })
-    });
-
-    if (!gRes.ok) {
-      const errTxt = await gRes.text().catch(() => '');
-      return fail(`Gemini HTTP ${gRes.status}: ${errTxt.slice(0,200)}`);
-    }
-
-    const data = await gRes.json();
-    const txt  = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (txt) return ok(txt);
-
-    const reason = data?.promptFeedback?.blockReason || 'unknown';
-    return fail(`Gemini produced no text – block reason: ${reason}`);
-  } catch (err) {
-    return fail('Gemini request failed: ' + err.message);
   }
 };

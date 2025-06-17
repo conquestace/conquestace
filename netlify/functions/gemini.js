@@ -1,7 +1,8 @@
 export async function handler(event) {
   try {
-    const input = JSON.parse(event.body).input;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const { input, key } = JSON.parse(event.body || '{}');
+    const apiKey = key;
+    if (!apiKey) throw new Error('Gemini key required');
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 

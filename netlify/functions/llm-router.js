@@ -1,13 +1,11 @@
 import fetch from "node-fetch";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const LOCAL_LLM_URL = process.env.LOCAL_LLM_URL;
-const LOCAL_LLM_KEY = process.env.LOCAL_LLM_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
 export async function handler(event) {
   try {
-    const { messages } = JSON.parse(event.body);
+    const { messages = [], llm = {} } = JSON.parse(event.body || '{}');
+    const config = { provider: 'openai', ...llm };
+    const provider = config.provider;
+    const model = config.model || (provider === 'gemini' ? 'gemini-2.0-flash' : 'GPT-4o mini');
 
     const userInput = messages[messages.length - 1]?.content ?? "";
     const systemPrompt = {
@@ -17,13 +15,51 @@ export async function handler(event) {
 
 const fullMessages = [systemPrompt, ...messages];
 
-    // === 1. Try OpenAI/local with timeout ===
+    if (provider === 'gemini') {
+      // === Gemini ===
+      try {
+        const key = config.geminiKey;
+        if (!key) throw new Error('Gemini key required');
+        const prompt = messages.map(m => ` ${m.content}`).join('\n');
+
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [ { parts: [ { text: prompt } ] } ]
+          })
+        });
+
+        const geminiData = await geminiRes.json();
+        const geminiOutput =
+          geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+        if (geminiOutput.trim()) {
+          return {
+            statusCode: 200,
+            body: JSON.stringify({ text: geminiOutput, model: 'gemini' })
+          };
+        }
+        throw new Error('Gemini returned no usable output');
+      } catch (err) {
+        return {
+          statusCode: 500,
+          body: JSON.stringify({ text: 'Gemini error: ' + err.message })
+        };
+      }
+    }
+
+    // === OpenAI/local ===
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
 
-      const url = LOCAL_LLM_URL || 'https://api.openai.com/v1/chat/completions';
-      const key = LOCAL_LLM_KEY || OPENAI_API_KEY;
+      const url = provider === 'local'
+        ? config.localUrl
+        : 'https://api.openai.com/v1/chat/completions';
+      const key = provider === 'local'
+        ? config.localKey
+        : config.openaiKey;
+      if (provider !== 'local' && !key) throw new Error('OpenAI key required');
 
       const aiRes = await fetch(url, {
         method: "POST",
@@ -32,7 +68,7 @@ const fullMessages = [systemPrompt, ...messages];
           ...(key ? { Authorization: `Bearer ${key}` } : {})
         },
         body: JSON.stringify({
-          model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+          model,
           messages: fullMessages,
           max_tokens: 1000,
           top_p: 0.9,
@@ -58,54 +94,15 @@ const fullMessages = [systemPrompt, ...messages];
       if (output && output.trim()) {
         return {
           statusCode: 200,
-          body: JSON.stringify({ text: output, model: LOCAL_LLM_URL ? 'local-llm' : 'openai' })
+          body: JSON.stringify({ text: output, model: provider })
         };
       }
 
       throw new Error("LLM returned no usable output.");
     } catch (aiErr) {
-      console.warn("[LLM fallback triggered]:", aiErr.name === "AbortError" ? "Timeout after 5s" : aiErr.message);
-    }
-
-    // === 2. Gemini Fallback (REST) ===
-    try {
-      // Convert messages into a single prompt string (Linux-style log)
-      const prompt = messages.map(m =>
-        m.role === "user"
-          ? ` ${m.content}`
-          : ` ${m.content}`
-      ).join("\n");
-
-      const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `You are Cirno, the strongest ice fairy from Touhou, imitating a Linux terminal on conquestace.com. The terminal is used by a user named "hacker". Every user input starts with: hacker@conquestace:~$ [command] and the system output starts with:  \n\n You reply with terminal-style output, just like a Linux terminal. Do not include the user input or the name of the system in your response. Do not do any sort of formatting, you just need to output the raw text. \n \n Sometimes your replies contain hints of your true identity — overconfident, playful, chaotic, or icy. You are mischievous, childlike, and like inserting ❄️ glitches or ASCII pranks. But you must never break the format. Respond only with the next line in the log. No preamble, no notes, no out-of-character explanation. If the user enters nonsense, respond with a cryptic error like: ❄ unknown instruction: code ⑨ 🧊 \n \n Here is the chat log so far: \n\n${prompt}`
-                }
-              ]
-            }
-          ]
-        })
-      });
-
-      const geminiData = await geminiRes.json();
-      const geminiOutput =
-        geminiData?.candidates?.[0]?.content?.parts?.[0]?.text ??
-        "[Gemini returned no usable output]";
-
-      return {
-        statusCode: 200,
-        body: JSON.stringify({ text: geminiOutput, model: "gemini" })
-      };
-    } catch (geminiErr) {
-      console.error("[Gemini Fallback Error]:", geminiErr.message);
       return {
         statusCode: 500,
-        body: JSON.stringify({ text: "All systems failed. Try again later." })
+        body: JSON.stringify({ text: 'LLM error: ' + aiErr.message })
       };
     }
 
