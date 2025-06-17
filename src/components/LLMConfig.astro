@@ -1,0 +1,71 @@
+---
+/* components/LLMConfig.astro */
+---
+
+<div class="mb-4" data-llm-config>
+  <button id="llm-config-toggle" class="bg-slatecard text-lightblue px-3 py-1 rounded">
+    ⚙️ Configure LLM
+  </button>
+  <div id="llm-config-panel" class="mt-2 flex flex-col gap-2 p-3 bg-midnight border border-slategray rounded hidden">
+    <label class="font-medium text-white">
+      Provider
+      <select id="cfg-provider" class="bg-slatecard p-1 rounded ml-2">
+        <option value="openai">OpenAI</option>
+        <option value="gemini">Gemini</option>
+        <option value="local">Local</option>
+      </select>
+    </label>
+    <label class="font-medium text-white">
+      Model
+      <input id="cfg-model" class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" placeholder="gpt-3.5-turbo" />
+    </label>
+    <label id="cfg-gemini-wrap" class="font-medium text-white hidden">
+      Gemini API Key
+      <input id="cfg-gemini-key" type="password" class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" placeholder="AIza..." />
+    </label>
+  </div>
+</div>
+
+<script is:client>
+(() => {
+  const toggleBtn   = document.getElementById('llm-config-toggle');
+  const panel       = document.getElementById('llm-config-panel');
+  const providerSel = document.getElementById('cfg-provider');
+  const modelInput  = document.getElementById('cfg-model');
+  const gemKeyInput = document.getElementById('cfg-gemini-key');
+  const gemWrap     = document.getElementById('cfg-gemini-wrap');
+
+  const defaults = { provider: 'openai', model: 'gpt-3.5-turbo', geminiKey: '' };
+  const saved    = JSON.parse(localStorage.getItem('llmConfig') || '{}');
+  const config   = { ...defaults, ...saved };
+
+  providerSel.value = config.provider;
+  modelInput.value  = config.model;
+  gemKeyInput.value = config.geminiKey;
+  gemWrap.classList.toggle('hidden', config.provider !== 'gemini');
+
+  function save() {
+    const cfg = {
+      provider : providerSel.value,
+      model    : modelInput.value.trim() || defaults.model,
+      geminiKey: gemKeyInput.value.trim()
+    };
+    localStorage.setItem('llmConfig', JSON.stringify(cfg));
+    window.dispatchEvent(new CustomEvent('llm-config-change', { detail: cfg }));
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    panel.classList.toggle('hidden');
+  });
+
+  providerSel.addEventListener('change', () => {
+    gemWrap.classList.toggle('hidden', providerSel.value !== 'gemini');
+    save();
+  });
+  modelInput.addEventListener('input', save);
+  gemKeyInput.addEventListener('input', save);
+
+  // initial broadcast
+  save();
+})();
+</script>
