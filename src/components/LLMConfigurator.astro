@@ -1,0 +1,49 @@
+---
+/* components/LLMConfigurator.astro */
+---
+<div class="mb-4 flex justify-end" data-llm-config>
+  <button id="configToggle" class="bg-slatecard text-lightblue px-2 py-1 rounded">⚙ LLM Config</button>
+</div>
+<div id="configPanel" class="hidden mb-4 bg-slatecard p-4 rounded space-y-2 text-sm text-white">
+  <label>
+    Provider
+    <select id="providerSelect" class="bg-midnight text-white ml-2 p-1 rounded">
+      <option value="openai">OpenAI</option>
+      <option value="gemini">Gemini</option>
+      <option value="local">Local</option>
+    </select>
+  </label>
+  <label>
+    Model
+    <input id="modelInput" class="bg-midnight text-white ml-2 p-1 rounded w-48" />
+  </label>
+</div>
+<script is:client>
+  const toggle = document.getElementById('configToggle');
+  const panel = document.getElementById('configPanel');
+  const provSel = document.getElementById('providerSelect');
+  const modelInp = document.getElementById('modelInput');
+
+  function load() {
+    provSel.value = localStorage.getItem('llmProvider') || 'openai';
+    modelInp.value = localStorage.getItem('llmModel') || (provSel.value === 'openai' ? 'gpt-3.5-turbo' : provSel.value === 'gemini' ? 'gemini-2.0-flash' : '');
+  }
+
+  function save() {
+    localStorage.setItem('llmProvider', provSel.value);
+    localStorage.setItem('llmModel', modelInp.value.trim());
+    window.dispatchEvent(new Event('llm-config-changed'));
+  }
+
+  toggle.addEventListener('click', () => {
+    panel.classList.toggle('hidden');
+    if (!panel.classList.contains('hidden')) {
+      load();
+    }
+  });
+
+  provSel.addEventListener('change', save);
+  modelInp.addEventListener('input', save);
+
+  load();
+</script>

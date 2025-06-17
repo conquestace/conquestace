@@ -69,8 +69,16 @@ export const handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return bad('Invalid JSON payload.'); }
 
-  const { initialPrompt, preset = 'default', instructions = '' } = body;
+  const {
+    initialPrompt,
+    preset = 'default',
+    instructions = '',
+    geminiKey,
+    provider = 'openai',
+    model
+  } = body;
   if (!initialPrompt?.trim()) return bad('initialPrompt missing.');
+  if (!geminiKey?.trim()) return bad('geminiKey missing.');
 
   /* 2 ─ content-policy gate ------------------------------------------- */
   const combinedInput = `${initialPrompt}\n\n${instructions}`;
@@ -89,64 +97,102 @@ export const handler = async (event) => {
     { role: 'user',   content: initialPrompt }
   ];
 
-  /* 4 ─ OpenUI (Gemma-3 primary) -------------------------------------- */
-  try {
-    const ouiRes = await fetch(
-      'https://oui.gpu.garden/api/chat/completions',
-      {
+  /* 4 ─ LLM selection ------------------------------------------------- */
+  if (provider === 'gemini') {
+    try {
+      const mdl = model || 'gemini-2.0-flash';
+      const url =
+        'https://generativelanguage.googleapis.com/v1beta/models/' +
+        `${mdl}:generateContent?key=${geminiKey}`;
+
+      const gRes = await fetch(url, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [ { parts: [{ text: initialPrompt.trim() }] } ],
+          generationConfig: { maxOutputTokens: 512 }
+        })
+      });
+
+      if (!gRes.ok) {
+        const errTxt = await gRes.text().catch(() => '');
+        return fail(`Gemini HTTP ${gRes.status}: ${errTxt.slice(0,200)}`);
+      }
+
+      const data = await gRes.json();
+      const txt  = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+      if (txt) return ok(txt);
+
+      const reason = data?.promptFeedback?.blockReason || 'unknown';
+      return fail(`Gemini produced no text – block reason: ${reason}`);
+    } catch (err) {
+      return fail('Gemini request failed: ' + err.message);
+    }
+  } else {
+    try {
+      const useLocal = provider === 'local';
+      const url = useLocal
+        ? process.env.LOCAL_LLM_URL
+        : 'https://api.openai.com/v1/chat/completions';
+      const apiKey = useLocal
+        ? process.env.LOCAL_LLM_KEY
+        : process.env.OPENAI_API_KEY;
+
+      const aiRes = await fetch(url, {
         method : 'POST',
         headers: {
-          Authorization : `Bearer ${process.env.OUI_API_KEY}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {})
         },
         body: JSON.stringify({
-          model: 'gemma3:1b-it-fp16',
+          model: model || process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
           messages,
           max_tokens: 1024
         }),
         signal: AbortSignal.timeout?.(30_000)
+      });
+
+      if (aiRes.ok) {
+        const data = await aiRes.json();
+        const txt  = data?.choices?.[0]?.message?.content?.trim();
+        if (txt) return ok(txt);
+      } else {
+        console.warn('[OpenAI/local] HTTP', aiRes.status);
       }
-    );
+    } catch (err) {
+      console.warn('[OpenAI/local error]', err.message);
+    }
 
-    if (ouiRes.ok) {
-      const data = await ouiRes.json();
-      const txt  = data?.choices?.[0]?.message?.content?.trim();
+    /* fallback to Gemini */
+    try {
+      const url =
+        'https://generativelanguage.googleapis.com/v1beta/models/' +
+        'gemini-2.0-flash:generateContent?key=' + geminiKey;
+
+      const gRes = await fetch(url, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+          systemInstruction: { parts: [{ text: systemPrompt }] },
+          contents: [ { parts: [{ text: initialPrompt.trim() }] } ],
+          generationConfig: { maxOutputTokens: 512 }
+        })
+      });
+
+      if (!gRes.ok) {
+        const errTxt = await gRes.text().catch(() => '');
+        return fail(`Gemini HTTP ${gRes.status}: ${errTxt.slice(0,200)}`);
+      }
+
+      const data = await gRes.json();
+      const txt  = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
       if (txt) return ok(txt);
-    } else {
-      console.warn('[OpenUI] HTTP', ouiRes.status);
+
+      const reason = data?.promptFeedback?.blockReason || 'unknown';
+      return fail(`Gemini produced no text – block reason: ${reason}`);
+    } catch (err) {
+      return fail('Gemini request failed: ' + err.message);
     }
-  } catch (err) {
-    console.warn('[OpenUI error]', err.message);
-  }
-
-  /* 5 ─ Gemini-Flash fallback ----------------------------------------- */
-  try {
-    const url =
-      'https://generativelanguage.googleapis.com/v1beta/models/' +
-      'gemini-2.0-flash:generateContent?key=' + process.env.GEMINI_API_KEY;
-
-    const gRes = await fetch(url, {
-      method : 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body   : JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [ { parts: [{ text: initialPrompt.trim() }] } ],
-        generationConfig: { maxOutputTokens: 512 }
-      })
-    });
-
-    if (!gRes.ok) {
-      const errTxt = await gRes.text().catch(() => '');
-      return fail(`Gemini HTTP ${gRes.status}: ${errTxt.slice(0,200)}`);
-    }
-
-    const data = await gRes.json();
-    const txt  = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    if (txt) return ok(txt);
-
-    const reason = data?.promptFeedback?.blockReason || 'unknown';
-    return fail(`Gemini produced no text – block reason: ${reason}`);
-  } catch (err) {
-    return fail('Gemini request failed: ' + err.message);
   }
 };
