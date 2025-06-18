@@ -1,6 +1,6 @@
 /*──────────────────────────────────────────────────────────────────────────────┐
   generatePrompt.js – Netlify function (refined)
-  • Supports OpenAI, Gemini, Local with preset-only system prompts.
+  • Supports OpenAI, Gemini, Local with editable system prompts.
   • Gemini is optional – executed only when provider==='gemini' & key supplied.
   • OpenAI/local now use an explicit AbortController timeout (no Node 18 issues).
   • All execution paths end with ok()/fail()/bad() so the client always gets JSON.
@@ -74,7 +74,7 @@ export const handler = async(event)=>{
   try{ body = JSON.parse(event.body||'{}'); }
   catch{return bad('Invalid JSON payload.');}
 
-  const { initialPrompt, preset='default', instructions='', instrPos='end', llm={}, geminiKey } = body;
+  const { initialPrompt, preset='default', systemPrompt='', instructions='', instrPos='end', llm={}, geminiKey } = body;
   if(!initialPrompt?.trim()) return bad('initialPrompt missing.');
 
   const config = { ...llm };
@@ -87,15 +87,15 @@ export const handler = async(event)=>{
   const provider = config.provider || 'openai';
   if(!provider) return bad('LLM provider missing.');
 
-  // 3) Build system prompt (preset‑only)
-  const basePrompt    = SYSTEM_PRESETS[preset] ?? SYSTEM_PRESETS.default;
-  let systemPrompt = basePrompt;
+  // 3) Build system prompt (preset or custom)
+  const basePrompt = systemPrompt.trim() || SYSTEM_PRESETS[preset] || SYSTEM_PRESETS.default;
+  let finalPrompt = basePrompt;
   if (instructions) {
-    systemPrompt = instrPos === 'start'
+    finalPrompt = instrPos === 'start'
       ? `${instructions}\n\n${basePrompt}`
       : `${basePrompt}\n\n${instructions}`;
   }
-  const messages      = [ { role:'system', content:systemPrompt }, { role:'user', content:initialPrompt } ];
+  const messages      = [ { role:'system', content: finalPrompt }, { role:'user', content:initialPrompt } ];
    const rawModel = config.model || (provider === 'gemini' ? 'gemini-2.0-flash' : process.env.OPENAI_MODEL || 'gpt-4o-mini');
   const model    = normalizeModel(rawModel, provider);
 
