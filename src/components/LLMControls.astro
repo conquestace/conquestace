@@ -3,13 +3,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
 ---
 
 <div class="flex flex-col gap-4" data-llm>
-  <!-- Instruction placement toggle -->
-  <label class="font-medium text-white">Instructions placement
-    <select id="instr-place" class="bg-slatecard p-1 rounded ml-2">
-      <option value="end">End of system prompt</option>
-      <option value="start">Start of system prompt</option>
-    </select>
-  </label>
 
   <!-- Primary action: toggles role based on provider presence -->
   <button id="llm-primary-btn" class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40">
@@ -32,7 +25,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
   const btn       = document.getElementById('llm-primary-btn');
   const presetSel = document.getElementById('llmPreset');
   const sysBox    = document.getElementById('system-box');
-  const placeSel  = document.getElementById('instr-place');
 
   let llmConfig      = {};
   let initialPrompt  = '';
@@ -81,7 +73,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
           initialPrompt,
           preset: presetSel.value,
           systemPrompt: sysBox.value.trim(),
-          instrPos: placeSel.value,
           llm: llmConfig
         })
       });
