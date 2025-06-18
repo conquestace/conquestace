@@ -7,6 +7,10 @@
 
   <!-- dynamic file list -->
   <ul id="file-list" class="space-y-2"></ul>
+  <button id="add-text"
+          class="bg-lightblue text-midnight px-2 py-1 rounded text-sm">
+    ➕ Add text
+  </button>
 
   <button id="build-btn"
           class="bg-blue-700 text-white px-3 py-2 rounded disabled:opacity-40"
@@ -22,25 +26,37 @@
 </div>
 
 <script is:client>
-  const list  = document.getElementById('file-list');
-  const build = document.getElementById('build-btn');
-  const box   = document.getElementById('prompt-box');
+  const list    = document.getElementById('file-list');
+  const build   = document.getElementById('build-btn');
+  const box     = document.getElementById('prompt-box');
+  const addText = document.getElementById('add-text');
 
-  /* each entry: { name, lines, count } */
-  let files = [];
+  /* entries can be wildcard or text */
+  let items = [];
 
   /* ─────────── receive wildcards ─────────── */
   window.addEventListener('wildcards-loaded', e => {
-    files = Object.entries(e.detail).map(([name, lines]) => ({
-      name, lines, count: 1
+    const wildcards = Object.entries(e.detail).map(([name, lines]) => ({
+      type: 'wildcard', name, lines, count: 1
     }));
+    items = [...items.filter(i => i.type === 'text'), ...wildcards];
     render();
-    build.disabled = !files.length;
+    build.disabled = !items.length;
   });
+
+  addText.onclick = () => {
+    items.push({ type: 'text', value: '' });
+    render();
+    build.disabled = !items.length;
+  };
 
   /* ─────────── build / re-roll ─────────── */
   build.addEventListener('click', () => {
-    box.value = files.flatMap(f => sample(f.lines, f.count)).join(', ').trim();
+    box.value = items.flatMap(it => {
+      if (it.type === 'wildcard') return sample(it.lines, it.count);
+      if (it.type === 'text') return it.value.trim() ? [it.value.trim()] : [];
+      return [];
+    }).join(', ').trim();
     fire();          // dispatch `initial-prompt`
   });
 
@@ -66,7 +82,7 @@
   /* redraw file list with drag-n-drop + count fields */
   function render() {
     list.textContent = '';
-    files.forEach((f, idx) => {
+    items.forEach((it, idx) => {
       const li = document.createElement('li');
       li.className =
         'bg-slatecard p-2 rounded flex items-center gap-3 draggable';
@@ -75,16 +91,36 @@
       const move = document.createElement('span');
       move.className = 'cursor-move select-none';
       move.textContent = '↕️';
-      const nameSpan = document.createElement('span');
-      nameSpan.className = 'flex-1 truncate';
-      nameSpan.textContent = f.name;
-      const input = document.createElement('input');
-      input.type = 'number';
-      input.min = '1';
-      input.value = f.count;
-      input.className = 'w-16 bg-midnight text-lightblue p-1 rounded text-right';
 
-      li.append(move, nameSpan, input);
+      const del = document.createElement('button');
+      del.className = 'text-red-400';
+      del.textContent = '🗑️';
+      del.onclick = () => { items.splice(idx, 1); render(); build.disabled = !items.length; };
+
+      if (it.type === 'wildcard') {
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'flex-1 truncate';
+        nameSpan.textContent = it.name;
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '1';
+        input.value = it.count;
+        input.className = 'w-16 bg-midnight text-lightblue p-1 rounded text-right';
+        input.addEventListener('input', ev => {
+          it.count = Math.max(1, +ev.target.value);
+        });
+        li.append(move, nameSpan, input, del);
+      } else {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Custom text';
+        input.value = it.value;
+        input.className = 'flex-1 bg-midnight text-lightblue p-1 rounded';
+        input.addEventListener('input', ev => {
+          it.value = ev.target.value;
+        });
+        li.append(move, input, del);
+      }
 
       /* drag & drop ordering */
       li.addEventListener('dragstart', e =>
@@ -93,13 +129,8 @@
       li.addEventListener('drop', e => {
         e.preventDefault();
         const from = +e.dataTransfer.getData('idx');
-        files.splice(idx, 0, files.splice(from, 1)[0]);
-        render();                    // re-render after reorder
-      });
-
-      /* update count */
-      input.addEventListener('input', ev => {
-        f.count = Math.max(1, +ev.target.value);
+        items.splice(idx, 0, items.splice(from, 1)[0]);
+        render();
       });
 
       list.appendChild(li);
