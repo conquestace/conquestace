@@ -65,19 +65,26 @@
 
   /* redraw file list with drag-n-drop + count fields */
   function render() {
-    list.innerHTML = '';
+    list.textContent = '';
     files.forEach((f, idx) => {
       const li = document.createElement('li');
       li.className =
         'bg-slatecard p-2 rounded flex items-center gap-3 draggable';
       li.draggable = true;
 
-      li.innerHTML = `
-        <span class="cursor-move select-none">↕️</span>
-        <span class="flex-1 truncate">${f.name}</span>
-        <input type="number" min="1" value="${f.count}"
-               class="w-16 bg-midnight text-lightblue p-1 rounded text-right" />
-      `;
+      const move = document.createElement('span');
+      move.className = 'cursor-move select-none';
+      move.textContent = '↕️';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'flex-1 truncate';
+      nameSpan.textContent = f.name;
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '1';
+      input.value = f.count;
+      input.className = 'w-16 bg-midnight text-lightblue p-1 rounded text-right';
+
+      li.append(move, nameSpan, input);
 
       /* drag & drop ordering */
       li.addEventListener('dragstart', e =>
@@ -91,7 +98,7 @@
       });
 
       /* update count */
-      li.querySelector('input').addEventListener('input', ev => {
+      input.addEventListener('input', ev => {
         f.count = Math.max(1, +ev.target.value);
       });
 

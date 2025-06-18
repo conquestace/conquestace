@@ -70,16 +70,19 @@
       { detail: Object.fromEntries(store) }));
 
   const updateList = () => {
-    listEl.innerHTML = '';
+    listEl.textContent = '';
     [...store.keys()].sort().forEach(name => {
       const li = document.createElement('li');
       li.className =
         'flex items-center justify-between bg-slatecard rounded px-2 py-1';
-      li.innerHTML = `<span class="truncate">${name}</span>
-                      <button class="text-red-400">🗑️</button>`;
-      li.querySelector('button').onclick = () => {
-        store.delete(name); updateList(); dispatch();
-      };
+      const span = document.createElement('span');
+      span.className = 'truncate';
+      span.textContent = name;
+      const btn = document.createElement('button');
+      btn.className = 'text-red-400';
+      btn.textContent = '🗑️';
+      btn.onclick = () => { store.delete(name); updateList(); dispatch(); };
+      li.append(span, btn);
       listEl.appendChild(li);
     });
   };
@@ -111,7 +114,7 @@
 
   /* ───────── category pills ───────── */
   async function populateCategories() {
-    catBar.innerHTML=''; fileBar.innerHTML=''; selectedCats.clear(); selectedFiles.clear();
+    catBar.textContent=''; fileBar.textContent=''; selectedCats.clear(); selectedFiles.clear();
     const manifest = await getManifest(collSel.value);
     const cats = [...new Set(manifest.map(e=>e.category.split('/').pop()))].sort();
 
@@ -121,7 +124,7 @@
       pill.onclick = () => {
         if (selectedCats.has(cat)) {
           selectedCats.delete(cat); pill.classList.remove('active');
-          if (fileBar.dataset.cat === cat) { fileBar.innerHTML=''; selectedFiles.clear(); }
+          if (fileBar.dataset.cat === cat) { fileBar.textContent=''; selectedFiles.clear(); }
         } else {
           selectedCats.add(cat); pill.classList.add('active');
           populateFiles(cat, manifest);
@@ -133,7 +136,7 @@
 
   /* ───────── file pills ───────── */
   function populateFiles(cat, manifest) {
-    fileBar.innerHTML=''; selectedFiles.clear();
+    fileBar.textContent=''; selectedFiles.clear();
     fileBar.dataset.cat = cat;
 
     manifest.filter(e => e.category.endsWith('/'+cat))

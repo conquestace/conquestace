@@ -41,10 +41,18 @@
     listEl.classList.toggle('hidden', !listOpen);
   };
 
-  const updateList = () =>
-    listEl.innerHTML = saved
-      .map((t,i)=>`<li class="mb-1"><strong>${i+1}.</strong> ${t}</li>`)
-      .join('');
+  const updateList = () => {
+    listEl.textContent = '';
+    saved.forEach((t, i) => {
+      const li = document.createElement('li');
+      li.className = 'mb-1';
+      const strong = document.createElement('strong');
+      strong.textContent = `${i + 1}.`;
+      li.appendChild(strong);
+      li.append(' ' + t);
+      listEl.appendChild(li);
+    });
+  };
 
   /* ---------- events ---------- */
   window.addEventListener('terminal-msg', e => {

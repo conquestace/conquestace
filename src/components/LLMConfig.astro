@@ -1,7 +1,7 @@
 ---
 /* LLMConfig.astro – provider picker + named presets (OpenAI, Gemini, Local)
    ✨ No system‑prompt editing – only provider + creds.
-   ✨ Multiple configs saved in localStorage under key `llmConfigs`.
+   ✨ Multiple configs saved in sessionStorage under key `llmConfigs`.
    ✨ Emits `llm-config-changed` whenever "Apply" is pressed. */
 ---
 
@@ -105,10 +105,10 @@ const cancelBtn  = document.getElementById('llm-cancel');
 
 /* ── Helpers ────────────────────────────── */
 function allConfigs() {
-  return JSON.parse(localStorage.getItem('llmConfigs') || '{}');
+  return JSON.parse(sessionStorage.getItem('llmConfigs') || '{}');
 }
 function saveConfigs(obj) {
-  localStorage.setItem('llmConfigs', JSON.stringify(obj));
+  sessionStorage.setItem('llmConfigs', JSON.stringify(obj));
 }
 function populateDropdown() {
   const cfgs = allConfigs();
