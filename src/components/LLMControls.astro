@@ -1,3 +1,7 @@
+---
+import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert { type: 'json' };
+---
+
 <div class="flex flex-col gap-4" data-llm>
   <!-- Free‑form LLM instructions -->
   <label class="font-medium text-white">📄 Extra instructions to the LLM</label>
@@ -11,26 +15,35 @@
     </select>
   </label>
 
-  <!-- System prompt preset -->
-  <label class="font-medium text-white">
-    System‑prompt preset
-    <select id="llmPreset" class="bg-slatecard p-1 rounded ml-2">
-      <option value="danbooru">Danbooru preset</option>
-      <option value="natural-language">Natural‑language preset</option>
-    </select>
-  </label>
-
   <!-- Primary action: toggles role based on provider presence -->
   <button id="llm-primary-btn" class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40">
     ⚙️ Configure LLM
   </button>
+
+  <!-- System prompt editor -->
+  <label class="font-medium text-white mt-2">System prompt preset
+    <select id="llmPreset" class="bg-slatecard p-1 rounded ml-2">
+      <option value="danbooru">Danbooru preset</option>
+      <option value="natural-language">Natural‑language preset</option>
+      <option value="custom">Custom</option>
+    </select>
+  </label>
+  <textarea id="system-box" rows="4" class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
+
+  <script type="application/json" id="preset-data">
+    {JSON.stringify(SYSTEM_PRESETS)}
+  </script>
 </div>
 
 <script is:client>
   const btn       = document.getElementById('llm-primary-btn');
   const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
+  const sysBox    = document.getElementById('system-box');
   const placeSel  = document.getElementById('instr-place');
+
+  const PRESETS = JSON.parse(document.getElementById('preset-data').textContent);
+  document.getElementById('preset-data').remove();
 
   let llmConfig      = {};
   let initialPrompt  = '';
@@ -58,6 +71,12 @@
     refreshBtn();
   });
 
+  function applyPreset() {
+    sysBox.value = PRESETS[presetSel.value] || '';
+  }
+  presetSel.addEventListener('change', applyPreset);
+  applyPreset();
+
   // --- click handler --------------------------------------------------
   btn.addEventListener('click', async () => {
     // If no provider yet → open config overlay
@@ -77,6 +96,7 @@
         body   : JSON.stringify({
           initialPrompt,
           preset: presetSel.value,
+          systemPrompt: sysBox.value.trim(),
           instructions: notes.value.trim(),
           instrPos: placeSel.value,
           llm: llmConfig
