@@ -3,6 +3,14 @@
   <label class="font-medium text-white">📄 Extra instructions to the LLM</label>
   <textarea id="llm-notes" rows="3" class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
 
+  <!-- Instruction placement toggle -->
+  <label class="font-medium text-white">Instructions placement
+    <select id="instr-place" class="bg-slatecard p-1 rounded ml-2">
+      <option value="end">End of system prompt</option>
+      <option value="start">Start of system prompt</option>
+    </select>
+  </label>
+
   <!-- System prompt preset -->
   <label class="font-medium text-white">
     System‑prompt preset
@@ -22,6 +30,7 @@
   const btn       = document.getElementById('llm-primary-btn');
   const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
+  const placeSel  = document.getElementById('instr-place');
 
   let llmConfig      = {};
   let initialPrompt  = '';
@@ -69,6 +78,7 @@
           initialPrompt,
           preset: presetSel.value,
           instructions: notes.value.trim(),
+          instrPos: placeSel.value,
           llm: llmConfig
         })
       });
