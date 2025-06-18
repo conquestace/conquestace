@@ -6,6 +6,8 @@
   • All execution paths end with ok()/fail()/bad() so the client always gets JSON.
 └──────────────────────────────────────────────────────────────────────────────*/
 
+import { isAuthorized } from "./_auth.js";
+
 // ── Helpers ────────────────────────────────────────────────────────────────
 const ok   = (t)=>({ statusCode:200, body:JSON.stringify({ text:t }) });
 const bad  = (m)=>({ statusCode:400, body:JSON.stringify({ error:m }) });
@@ -74,6 +76,8 @@ async function violatesPolicy(text){
 
 // ── Main handler ───────────────────────────────────────────────────────────
 export const handler = async(event)=>{
+  if(!isAuthorized(event))
+    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
   // 1) Parse payload
   let body;
   try{ body = JSON.parse(event.body||'{}'); }
