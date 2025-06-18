@@ -26,10 +26,6 @@
         <input id="openai-key" type="password" placeholder="sk-..."
                class="bg-slatecard p-1 rounded ml-2 w-full" />
       </label>
-      <label class="block">System Prompt
-        <textarea id="openai-system" rows="2"
-                  class="bg-slatecard p-1 rounded ml-2 w-full"></textarea>
-      </label>
     </div>
 
     <div id="gemini-field" class="space-y-2 hidden">
@@ -65,7 +61,6 @@
   const gemKey     = document.getElementById('gemini-key');
   const openaiWrap = document.getElementById('openai-fields');
   const openaiKey  = document.getElementById('openai-key');
-  const openaiSys  = document.getElementById('openai-system');
   const localWrap  = document.getElementById('local-fields');
   const localUrl   = document.getElementById('local-url');
   const localKey   = document.getElementById('local-key');
@@ -78,7 +73,6 @@
     model.value     = conf.model   || '';
     gemKey.value    = conf.geminiKey || '';
     openaiKey.value = conf.openaiKey || '';
-    openaiSys.value = conf.systemPrompt || '';
     localUrl.value  = conf.localUrl || '';
     localKey.value  = conf.localKey || '';
     updateFields();
@@ -88,6 +82,10 @@
     gemField.classList.toggle('hidden', provider.value !== 'gemini');
     localWrap.classList.toggle('hidden', provider.value !== 'local');
     openaiWrap.classList.toggle('hidden', provider.value !== 'openai');
+    model.placeholder = provider.value === 'gemini'
+      ? 'gemini-2.0-flash'
+      : 'GPT-4o mini';
+    if (!model.value.trim()) model.value = model.placeholder;
   }
 
   function save() {
@@ -96,7 +94,6 @@
       model       : model.value.trim(),
       geminiKey   : gemKey.value.trim(),
       openaiKey   : openaiKey.value.trim(),
-      systemPrompt: openaiSys.value.trim(),
       localUrl    : localUrl.value.trim(),
       localKey    : localKey.value.trim()
     };

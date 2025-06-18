@@ -2,6 +2,7 @@
 import BaseLayout     from '../layouts/BaseLayout.astro';
 import WildcardLoader from '../components/WildcardLoader.astro';
 import PromptBuilder  from '../components/PromptBuilder.astro';
+import SystemPrompt   from '../components/SystemPrompt.astro';
 import LLMControls    from '../components/LLMControls.astro';
 import LLMConfig      from '../components/LLMConfig.astro';
 import TerminalOutput from '../components/TerminalOutput.astro';
@@ -17,13 +18,16 @@ import PromptSaver    from '../components/PromptSaver.astro';
     <!-- 1. defaults + drag-drop -->
     <WildcardLoader />
 
-    <!-- 2. arrange & build, preview -->
+    <!-- 2. system prompt -->
+    <SystemPrompt />
+
+    <!-- 3. arrange & build, preview -->
     <PromptBuilder />
 
-    <!-- 3. extra instructions + send -->
+    <!-- 4. extra instructions + send -->
     <LLMControls />
 
-    <!-- 4. live log -->
+    <!-- 5. live log -->
     <TerminalOutput />
     <PromptSaver />
 

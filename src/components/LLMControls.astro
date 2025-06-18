@@ -8,14 +8,9 @@
   <textarea id="llm-notes" rows="3"
             class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
 
-  <!-- preset selector -->
-  <label class="font-medium text-white">
-    System-prompt preset
-    <select id="llmPreset" class="bg-slatecard p-1 rounded ml-2">
-      <option value="danbooru">Danbooru preset</option>
-      <option value="natural-language">Natural-language preset</option>
-      <!-- add more <option>s as you introduce new presets -->
-    </select>
+  <label class="text-lightblue text-sm">
+    <input id="instrFirst" type="checkbox" class="mr-1" />
+    Place instructions before prompt
   </label>
 
 
@@ -31,20 +26,26 @@
   /* element refs */
   const btn   = document.getElementById('send-btn');
   const notes = document.getElementById('llm-notes');
-  const presetSel = document.getElementById('llmPreset');
+  const instrFirst = document.getElementById('instrFirst');
 
   let llmConfig = {};
 
   function update() {
     const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
-    btn.disabled = !initialPrompt || needsKey;
+    btn.disabled = !initialPrompt || !systemPrompt || needsKey;
   }
 
   let initialPrompt = '';
+  let systemPrompt  = '';
 
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
     initialPrompt = e.detail.trim();
+    update();
+  });
+
+  window.addEventListener('system-prompt-changed', e => {
+    systemPrompt = e.detail.trim();
     update();
   });
 
@@ -56,7 +57,7 @@
   /* click → POST to Netlify function */
   btn.addEventListener('click', async () => {
     const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
-    if (!initialPrompt || needsKey) return;
+    if (!initialPrompt || !systemPrompt || needsKey) return;
     btn.disabled = true;
     post('🚀 Sending to LLM…');
 
@@ -65,9 +66,10 @@
         method : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body   : JSON.stringify({
-          initialPrompt,
-          preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim(), // <── extra textarea
+          initialPrompt: instrFirst.checked
+            ? `${notes.value.trim()}\n\n${initialPrompt}`
+            : `${initialPrompt}${notes.value.trim() ? `\n\n${notes.value.trim()}` : ''}`,
+          systemPrompt,
           llm: llmConfig
         })
       });

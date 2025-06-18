@@ -1,0 +1,38 @@
+---
+import presets from '../../netlify/functions/systemPrompts.json';
+---
+
+<div class="flex flex-col gap-4" data-system-prompt>
+  <label class="font-medium text-white">
+    System Prompt Preset
+    <select id="spPreset" class="bg-slatecard p-1 rounded ml-2">
+      {Object.keys(presets).map(key => (
+        <option value={key}>{key}</option>
+      ))}
+    </select>
+  </label>
+  <textarea id="spBox" rows="3"
+            class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
+</div>
+
+<script is:client>
+(() => {
+  const PRESETS = ${JSON.stringify(presets)};
+  const sel = document.getElementById('spPreset');
+  const box = document.getElementById('spBox');
+
+  function fire() {
+    window.dispatchEvent(new CustomEvent('system-prompt-changed', { detail: box.value.trim() }));
+  }
+  function load() {
+    box.value = PRESETS[sel.value] || '';
+    fire();
+  }
+
+  sel.addEventListener('change', load);
+  box.addEventListener('input', fire);
+
+  load();
+})();
+</script>
+
