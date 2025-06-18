@@ -1,13 +1,29 @@
 ---
-/* components/LLMConfig.astro */
+/* LLMConfig.astro – provider picker + named presets (OpenAI, Gemini, Local)
+   ✨ No system‑prompt editing – only provider + creds.
+   ✨ Multiple configs saved in localStorage under key `llmConfigs`.
+   ✨ Emits `llm-config-changed` whenever "Apply" is pressed. */
 ---
 
+<!-- ── Trigger button ─────────────────────────────────────────────── -->
 <button id="llm-open" class="bg-mathblue text-white px-3 py-1 rounded">⚙️ Configure LLM</button>
 
+<!-- ── Modal overlay ──────────────────────────────────────────────── -->
 <div id="llm-overlay" class="hidden fixed inset-0 z-50 bg-[#000000cc] backdrop-blur-sm flex items-center justify-center">
-  <div class="bg-slatecard p-4 rounded w-[90%] max-w-md text-lightblue space-y-4 font-mono">
-    <h2 class="text-white text-lg">LLM Configuration</h2>
+  <div class="bg-slatecard p-4 rounded w-[92%] max-w-md text-lightblue space-y-4 font-mono">
 
+    <!-- Header + preset selector -->
+    <div class="flex items-center justify-between">
+      <h2 class="text-white text-lg">LLM Configuration</h2>
+      <select id="config-select" class="bg-slatecard p-1 rounded text-sm"></select>
+    </div>
+
+    <!-- Config name field (for new / rename) -->
+    <label class="block">Config Name
+      <input id="config-name" type="text" placeholder="my-default" class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" />
+    </label>
+
+    <!-- Provider picker -->
     <label class="block">Provider
       <select id="llm-provider" class="bg-slatecard p-1 rounded ml-2">
         <option value="openai">OpenAI</option>
@@ -16,104 +32,176 @@
       </select>
     </label>
 
+    <!-- Model name (always shown) -->
     <label class="block">Model
-      <input id="llm-model" type="text" placeholder="gpt-3.5-turbo"
-             class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" />
+      <input id="llm-model" type="text" placeholder="gpt-4o-mini" class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" />
     </label>
 
+    <!-- Provider‑specific credential groups -->
     <div id="openai-fields" class="space-y-2 hidden">
       <label class="block">OpenAI API Key
-        <input id="openai-key" type="password" placeholder="sk-..."
-               class="bg-slatecard p-1 rounded ml-2 w-full" />
-      </label>
-      <label class="block">System Prompt
-        <textarea id="openai-system" rows="2"
-                  class="bg-slatecard p-1 rounded ml-2 w-full"></textarea>
+        <input id="openai-key" type="password" placeholder="sk-..." class="bg-slatecard p-1 rounded ml-2 w-full" />
       </label>
     </div>
 
     <div id="gemini-field" class="space-y-2 hidden">
       <label class="block">Gemini API Key
-        <input id="gemini-key" type="password" placeholder="AIza..."
-               class="bg-slatecard p-1 rounded ml-2 w-full" />
+        <input id="gemini-key" type="password" placeholder="AIza..." class="bg-slatecard p-1 rounded ml-2 w-full" />
       </label>
     </div>
+    <!-- …inside <div id="gemini-field" …> -->
+<label class="block">Gemini API Key
+  <input id="gemini-key" type="password" placeholder="AIza..."
+         class="bg-slatecard p-1 rounded ml-2 w-full" />
+</label>
+
+<!-- ✨ new helper line -->
+<p class="text-sm text-lightblue/70 ml-2">
+  Don’t have a key? 
+  <a href="https://aistudio.google.com/app/apikey"
+     target="_blank"
+     rel="noopener noreferrer"
+     class="underline hover:text-lightblue">
+     Get one free&nbsp;↗
+  </a>
+</p>
 
     <div id="local-fields" class="space-y-2 hidden">
       <label class="block">Endpoint URL
-        <input id="local-url" type="text" placeholder="http://127.0.0.1:8000/v1/chat/completions"
-               class="bg-slatecard p-1 rounded ml-2 w-full" />
+        <input id="local-url" type="text" placeholder="http://127.0.0.1:8000/v1/chat/completions" class="bg-slatecard p-1 rounded ml-2 w-full" />
       </label>
       <label class="block">Auth Key
         <input id="local-key" type="text" class="bg-slatecard p-1 rounded ml-2 w-full" />
       </label>
     </div>
 
-    <div class="flex justify-end gap-2">
-      <button id="llm-save"   class="bg-green-700 text-white px-3 py-1 rounded">Save</button>
-      <button id="llm-cancel" class="bg-slategray text-white px-3 py-1 rounded">Cancel</button>
+    <!-- Action buttons -->
+    <div class="flex flex-wrap justify-end gap-2 pt-2 border-t border-softgray/40">
+      <button id="config-delete" class="bg-red-700 text-white px-3 py-1 rounded text-sm">🗑️ Delete</button>
+      <button id="config-save"   class="bg-lightblue text-black px-3 py-1 rounded text-sm">💾 Save</button>
+      <button id="config-apply"  class="bg-green-700 text-white px-3 py-1 rounded text-sm">✔️ Apply</button>
+      <button id="llm-cancel"    class="bg-slategray text-white px-3 py-1 rounded text-sm">✖ Cancel</button>
     </div>
+
   </div>
 </div>
 
 <script is:client>
-  const openBtn    = document.getElementById('llm-open');
-  const overlay    = document.getElementById('llm-overlay');
-  const provider   = document.getElementById('llm-provider');
-  const model      = document.getElementById('llm-model');
-  const gemField   = document.getElementById('gemini-field');
-  const gemKey     = document.getElementById('gemini-key');
-  const openaiWrap = document.getElementById('openai-fields');
-  const openaiKey  = document.getElementById('openai-key');
-  const openaiSys  = document.getElementById('openai-system');
-  const localWrap  = document.getElementById('local-fields');
-  const localUrl   = document.getElementById('local-url');
-  const localKey   = document.getElementById('local-key');
-  const saveBtn    = document.getElementById('llm-save');
-  const cancelBtn  = document.getElementById('llm-cancel');
+/* ── DOM refs ───────────────────────────── */
+const openBtn   = document.getElementById('llm-open');
+const overlay   = document.getElementById('llm-overlay');
+const selectEl  = document.getElementById('config-select');
+const nameEl    = document.getElementById('config-name');
+const provider  = document.getElementById('llm-provider');
+const model     = document.getElementById('llm-model');
+/* provider‑specific elements */
+const openaiWrap = document.getElementById('openai-fields');
+const gemWrap    = document.getElementById('gemini-field');
+const localWrap  = document.getElementById('local-fields');
+const openaiKey  = document.getElementById('openai-key');
+const gemKey     = document.getElementById('gemini-key');
+const localUrl   = document.getElementById('local-url');
+const localKey   = document.getElementById('local-key');
+/* action buttons */
+const saveBtn    = document.getElementById('config-save');
+const delBtn     = document.getElementById('config-delete');
+const applyBtn   = document.getElementById('config-apply');
+const cancelBtn  = document.getElementById('llm-cancel');
 
-  function load() {
-    const conf = JSON.parse(localStorage.getItem('llmConfig') || '{}');
-    provider.value  = conf.provider || 'openai';
-    model.value     = conf.model   || '';
-    gemKey.value    = conf.geminiKey || '';
-    openaiKey.value = conf.openaiKey || '';
-    openaiSys.value = conf.systemPrompt || '';
-    localUrl.value  = conf.localUrl || '';
-    localKey.value  = conf.localKey || '';
-    updateFields();
-  }
-
-  function updateFields() {
-    gemField.classList.toggle('hidden', provider.value !== 'gemini');
-    localWrap.classList.toggle('hidden', provider.value !== 'local');
-    openaiWrap.classList.toggle('hidden', provider.value !== 'openai');
-  }
-
-  function save() {
-    const conf = {
-      provider    : provider.value,
-      model       : model.value.trim(),
-      geminiKey   : gemKey.value.trim(),
-      openaiKey   : openaiKey.value.trim(),
-      systemPrompt: openaiSys.value.trim(),
-      localUrl    : localUrl.value.trim(),
-      localKey    : localKey.value.trim()
-    };
-    localStorage.setItem('llmConfig', JSON.stringify(conf));
-    window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: conf }));
-    overlay.classList.add('hidden');
-  }
-
-  openBtn.addEventListener('click', () => {
-    load();
-    overlay.classList.remove('hidden');
+/* ── Helpers ────────────────────────────── */
+function allConfigs() {
+  return JSON.parse(localStorage.getItem('llmConfigs') || '{}');
+}
+function saveConfigs(obj) {
+  localStorage.setItem('llmConfigs', JSON.stringify(obj));
+}
+function populateDropdown() {
+  const cfgs = allConfigs();
+  selectEl.innerHTML = '';
+  Object.keys(cfgs).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name; selectEl.appendChild(opt);
   });
-  cancelBtn.addEventListener('click', () => overlay.classList.add('hidden'));
-  provider.addEventListener('change', updateFields);
-  saveBtn.addEventListener('click', save);
+  // auto-select first if none chosen
+  if (!selectEl.value && selectEl.options.length) selectEl.value = selectEl.options[0].value;
+}
+function showFields() {
+  openaiWrap.classList.toggle('hidden', provider.value !== 'openai');
+  gemWrap.classList.toggle('hidden',   provider.value !== 'gemini');
+  localWrap.classList.toggle('hidden', provider.value !== 'local');
+  // update model placeholder
+  model.placeholder = provider.value === 'gemini'
+    ? 'gemini-2.0-flash'
+    : provider.value === 'openai'
+      ? 'gpt-4o-mini'
+      : 'local-model';
+}
+function loadConfig(name) {
+  const cfg = allConfigs()[name] || {};
+  nameEl.value   = name || '';
+  provider.value = cfg.provider || 'openai';
+  model.value    = cfg.model    || '';
+  openaiKey.value = cfg.openaiKey || '';
+  gemKey.value    = cfg.geminiKey || '';
+  localUrl.value  = cfg.localUrl  || '';
+  localKey.value  = cfg.localKey  || '';
+  showFields();
+}
+function gatherInput() {
+  return {
+    provider : provider.value,
+    model    : model.value.trim(),
+    openaiKey: openaiKey.value.trim(),
+    geminiKey: gemKey.value.trim(),
+    localUrl : localUrl.value.trim(),
+    localKey : localKey.value.trim()
+  };
+}
 
-  // initial config dispatch
-  load();
-  window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: JSON.parse(localStorage.getItem('llmConfig') || '{}') }));
+/* ── CRUD Ops ───────────────────────────── */
+function saveCurrent() {
+  const name = nameEl.value.trim() || 'default';
+  const cfgs = allConfigs();
+  cfgs[name] = gatherInput();
+  saveConfigs(cfgs);
+  populateDropdown();
+  selectEl.value = name;
+}
+function deleteCurrent() {
+  const name = selectEl.value;
+  if (!name) return;
+  const cfgs = allConfigs();
+  delete cfgs[name];
+  saveConfigs(cfgs);
+  populateDropdown();
+  loadConfig(selectEl.value);
+}
+function applyCurrent() {
+  const cfg = gatherInput();
+  if (!cfg.provider) {
+    alert('Please choose a provider (OpenAI, Gemini, or Local).');
+    return;
+  }
+  saveCurrent(); // ensure latest edits persist
+  window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: cfg }));
+  overlay.classList.add('hidden');
+}
+
+/* ── Event wiring ───────────────────────── */
+openBtn.addEventListener('click', () => {
+  populateDropdown();
+  loadConfig(selectEl.value);
+  overlay.classList.remove('hidden');
+});
+selectEl.addEventListener('change', e => loadConfig(e.target.value));
+provider.addEventListener('change', showFields);
+saveBtn .addEventListener('click', saveCurrent);
+delBtn  .addEventListener('click', deleteCurrent);
+applyBtn.addEventListener('click', applyCurrent);
+cancelBtn.addEventListener('click', () => overlay.classList.add('hidden'));
+
+/* ── Initial bootstrap: load default config (if any) ── */
+populateDropdown();
+if (selectEl.value) loadConfig(selectEl.value);
+else showFields();
 </script>

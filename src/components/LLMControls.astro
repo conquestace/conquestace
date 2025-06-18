@@ -1,88 +1,90 @@
----
-/* components/LLMControls.astro */
----
-
 <div class="flex flex-col gap-4" data-llm>
-  <!-- free-form additions -->
+  <!-- Free‑form LLM instructions -->
   <label class="font-medium text-white">📄 Extra instructions to the LLM</label>
-  <textarea id="llm-notes" rows="3"
-            class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
+  <textarea id="llm-notes" rows="3" class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
 
-  <!-- preset selector -->
+  <!-- System prompt preset -->
   <label class="font-medium text-white">
-    System-prompt preset
+    System‑prompt preset
     <select id="llmPreset" class="bg-slatecard p-1 rounded ml-2">
       <option value="danbooru">Danbooru preset</option>
-      <option value="natural-language">Natural-language preset</option>
-      <!-- add more <option>s as you introduce new presets -->
+      <option value="natural-language">Natural‑language preset</option>
     </select>
   </label>
 
-
-  <!-- send -->
-  <button id="send-btn"
-          class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40"
-          disabled>
-    🚀 Send to LLM
+  <!-- Primary action: toggles role based on provider presence -->
+  <button id="llm-primary-btn" class="bg-green-700 text-white px-3 py-2 rounded disabled:opacity-40">
+    ⚙️ Configure LLM
   </button>
 </div>
 
 <script is:client>
-  /* element refs */
-  const btn   = document.getElementById('send-btn');
-  const notes = document.getElementById('llm-notes');
+  const btn       = document.getElementById('llm-primary-btn');
+  const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
 
-  let llmConfig = {};
+  let llmConfig      = {};
+  let initialPrompt  = '';
 
-  function update() {
-    const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
-    btn.disabled = !initialPrompt || needsKey;
+  const hasProvider = () => !!llmConfig.provider;
+
+  function refreshBtn() {
+    if (hasProvider()) {
+      btn.textContent = '🚀 Send to LLM';
+      btn.disabled    = !initialPrompt;
+    } else {
+      btn.textContent = '⚙️ Configure LLM';
+      btn.disabled    = false;
+    }
   }
 
-  let initialPrompt = '';
-
-  /* get initial prompt from PromptBuilder */
+  // --- global events --------------------------------------------------
   window.addEventListener('initial-prompt', e => {
-    initialPrompt = e.detail.trim();
-    update();
+    initialPrompt = (e.detail || '').trim();
+    refreshBtn();
   });
 
   window.addEventListener('llm-config-changed', e => {
     llmConfig = e.detail || {};
-    update();
+    refreshBtn();
   });
 
-  /* click → POST to Netlify function */
+  // --- click handler --------------------------------------------------
   btn.addEventListener('click', async () => {
-    const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
-    if (!initialPrompt || needsKey) return;
+    // If no provider yet → open config overlay
+    if (!hasProvider()) {
+      document.getElementById('llm-open')?.click();
+      return;
+    }
+    if (!initialPrompt) return;
+
     btn.disabled = true;
     post('🚀 Sending to LLM…');
 
     try {
       const res = await fetch('/.netlify/functions/generatePrompt', {
         method : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type':'application/json' },
         body   : JSON.stringify({
           initialPrompt,
-          preset: presetSel.value,          // <── chosen preset
-          instructions: notes.value.trim(), // <── extra textarea
+          preset: presetSel.value,
+          instructions: notes.value.trim(),
           llm: llmConfig
         })
       });
-
       const { text, error } = await res.json();
       post(text || `❌ ${error || 'Generation failed.'}`);
     } catch (err) {
       post(`❌ Network error: ${err.message}`);
     } finally {
-      btn.disabled = false;
+      btn.disabled = !hasProvider() ? false : !initialPrompt;
     }
   });
 
-  /* utility: publish to TerminalOutput */
   function post(msg) {
     window.dispatchEvent(new CustomEvent('terminal-msg', { detail: msg }));
   }
+
+  // Initial render state
+  refreshBtn();
 </script>
