@@ -19,7 +19,7 @@ const SYSTEM_PRESETS = {
 */
 const BLOCK_THRESHOLDS = {
   /* Sexual content */
-  sexual               : 0.70,   // “explicit” only
+  sexual               : 0.50,   // “explicit” only
   'sexual/minors'      : 0.01,   // block if ANY chance
   /* Violence */
   violence             : 0.85,
