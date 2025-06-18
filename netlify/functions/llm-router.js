@@ -1,4 +1,5 @@
 import fetch from "node-fetch";
+import { isAuthorized } from "./_auth.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const LOCAL_LLM_URL = process.env.LOCAL_LLM_URL;
@@ -6,6 +7,9 @@ const LOCAL_LLM_KEY = process.env.LOCAL_LLM_KEY;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 export async function handler(event) {
+  if(!isAuthorized(event)) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+  }
   try {
     const { messages } = JSON.parse(event.body);
 

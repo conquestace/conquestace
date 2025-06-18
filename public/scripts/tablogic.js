@@ -155,7 +155,13 @@ function toggleClock() {
 
 function showMessage(user, msg) {
   const el = document.querySelector('#message');
-  if (el) el.innerHTML = `<span class="text-sky">${user}</span>: ${msg}`;
+  if (!el) return;
+  el.textContent = '';
+  const span = document.createElement('span');
+  span.className = 'text-sky';
+  span.textContent = user;
+  el.appendChild(span);
+  el.append(`: ${msg}`);
 }
 function triggerMatrix() {
   if (document.getElementById('matrix-bg')) return;

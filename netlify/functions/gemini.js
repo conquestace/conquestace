@@ -1,4 +1,9 @@
+import { isAuthorized } from "./_auth.js";
+
 export async function handler(event) {
+  if(!isAuthorized(event)) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
+  }
   try {
     const input = JSON.parse(event.body).input;
     const apiKey = process.env.GEMINI_API_KEY;
