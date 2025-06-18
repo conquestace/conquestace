@@ -1,16 +1,20 @@
 ---
 /* Listens for 'terminal-msg' events and prints them */
 ---
-<pre id="terminal"
-     class="bg-[#1a1e2a] p-4 rounded-xl shadow text-[#bfdbfe]
-            whitespace-pre-wrap text-sm leading-relaxed
-            min-h-[6rem] max-h-[20rem] overflow-y-auto
-            border border-[#333] font-mono">
-<span class="text-green-400">&gt; </span> 
-</pre>
+<div class="relative">
+  <button id="termCopy" class="absolute top-2 right-2 text-xs bg-lightblue text-midnight px-2 py-1 rounded">📋 Copy</button>
+  <pre id="terminal"
+       class="bg-[#1a1e2a] p-4 rounded-xl shadow text-[#bfdbfe]
+              whitespace-pre-wrap text-sm leading-relaxed
+              min-h-[6rem] max-h-[20rem] overflow-y-auto
+              border border-[#333] font-mono">
+  <span class="text-green-400">&gt; </span>
+  </pre>
+</div>
 
 <script is:client>
   const term = document.getElementById('terminal');
+  const copyBtn = document.getElementById('termCopy');
 
   window.addEventListener('terminal-msg', e => {
     term.replaceChildren();
@@ -20,5 +24,16 @@
     term.appendChild(prefix);
     term.appendChild(document.createTextNode(e.detail));
     term.scrollTop = term.scrollHeight;
+  });
+
+  copyBtn.addEventListener('click', async () => {
+    const text = term.textContent.trim();
+    try {
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = '✅ Copied!';
+    } catch (err) {
+      copyBtn.textContent = '❌ Failed';
+    }
+    setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 1500);
   });
 </script>
