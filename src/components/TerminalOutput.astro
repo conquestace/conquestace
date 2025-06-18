@@ -2,38 +2,64 @@
 /* Listens for 'terminal-msg' events and prints them */
 ---
 <div class="relative">
-  <button id="termCopy" class="absolute top-2 right-2 text-xs bg-lightblue text-midnight px-2 py-1 rounded">📋 Copy</button>
   <pre id="terminal"
        class="bg-[#1a1e2a] p-4 rounded-xl shadow text-[#bfdbfe]
-              whitespace-pre-wrap text-sm leading-relaxed
+              whitespace-pre-wrap text-sm leading-relaxed cursor-pointer
               min-h-[6rem] max-h-[20rem] overflow-y-auto
               border border-[#333] font-mono">
   <span class="text-green-400">&gt; </span>
   </pre>
+  <button id="termCopy"
+          class="absolute top-2 right-2 text-xs bg-[#1a1e2a] text-[#bfdbfe]
+                 border border-[#333] rounded px-1 py-0.5 font-mono opacity-70 hover:opacity-100">
+    📋 Copy
+  </button>
+  <div id="copyToast"
+       class="hidden absolute left-1/2 -translate-x-1/2 bottom-2 bg-lightblue text-midnight text-xs px-2 py-1 rounded opacity-0 transition-opacity pointer-events-none">
+    prompt copied!
+  </div>
 </div>
 
 <script is:client>
-  const term = document.getElementById('terminal');
-  const copyBtn = document.getElementById('termCopy');
+  const term      = document.getElementById('terminal');
+  const copyBtn   = document.getElementById('termCopy');
+  const toast     = document.getElementById('copyToast');
+  let currentMsg  = '';
 
   window.addEventListener('terminal-msg', e => {
+    currentMsg = (e.detail || '').toString();
     term.replaceChildren();
     const prefix = document.createElement('span');
     prefix.className = 'text-green-400';
     prefix.textContent = '> ';
     term.appendChild(prefix);
-    term.appendChild(document.createTextNode(e.detail));
+    term.appendChild(document.createTextNode(currentMsg));
     term.scrollTop = term.scrollHeight;
   });
 
-  copyBtn.addEventListener('click', async () => {
-    const text = term.textContent.trim();
+  async function copyPrompt() {
+    const text = currentMsg.trim();
     try {
       await navigator.clipboard.writeText(text);
-      copyBtn.textContent = '✅ Copied!';
+      showToast();
     } catch (err) {
-      copyBtn.textContent = '❌ Failed';
+      showToast('copy failed');
     }
-    setTimeout(() => { copyBtn.textContent = '📋 Copy'; }, 1500);
-  });
+  }
+
+  function showToast(msg = 'prompt copied!') {
+    toast.textContent = msg;
+    toast.classList.remove('hidden', 'opacity-0');
+    toast.classList.add('opacity-100');
+    setTimeout(() => {
+      toast.classList.remove('opacity-100');
+      toast.classList.add('opacity-0');
+    }, 1500);
+    setTimeout(() => {
+      toast.classList.add('hidden');
+    }, 2000);
+  }
+
+  term.addEventListener('click', copyPrompt);
+  copyBtn.addEventListener('click', e => { e.stopPropagation(); copyPrompt(); });
 </script>
