@@ -26,7 +26,8 @@ I’m **Ashiful Bhuiyan** (aka **ConquestAce**). I do math and physics, develop 
 
 ## 🌐 Web & Links
 
-- 🌍 **Website**: Ashiful: [ashiful.institute](https://ashiful.institute) conquestace: [conquestace.com](https://www.conquestace.com)
+- 🌍 **Ashiful**: [ashiful.institute](https://ashiful.institute)
+- 🌍 **conquestace**: [conquestace.com](https://www.conquestace.com)
 - 🔗 **Portfolio**: [About me](https://ashiful.institute/aboutme)
 - 🐦 **Bluesky**: [@conquestace.com](https://bsky.app/profile/conquestace.com)
 - 🛠 **Now Building**: `Project: CONQUESTACE`, a cryptic landing experience + glitch-themed tools
