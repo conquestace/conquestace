@@ -104,8 +104,8 @@ export const handler = async (event) => {
   ];
 
   const model = config.model || (provider === 'gemini'
-    ? 'gemini-2.0-flash'
-    : 'GPT-4o mini');
+    ? ''
+    : '');
 
   if (provider === 'gemini') {
     /* 4 ─ Gemini request ----------------------------------------------- */

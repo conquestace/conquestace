@@ -17,7 +17,7 @@
     </label>
 
     <label class="block">Model
-      <input id="llm-model" type="text" placeholder="GPT-4o mini"
+      <input id="llm-model" type="text"
              class="bg-slatecard p-1 rounded ml-2 w-full sm:w-auto" />
     </label>
 
@@ -82,10 +82,13 @@
     gemField.classList.toggle('hidden', provider.value !== 'gemini');
     localWrap.classList.toggle('hidden', provider.value !== 'local');
     openaiWrap.classList.toggle('hidden', provider.value !== 'openai');
-    model.placeholder = provider.value === 'gemini'
-      ? 'gemini-2.0-flash'
-      : 'GPT-4o mini';
-    if (!model.value.trim()) model.value = model.placeholder;
+    model.placeholder =
+      provider.value === 'gemini'
+        ? 'gemini-2.0-flash'
+        : provider.value === 'openai'
+        ? 'GPT-4o mini'
+        : 'Local Model';
+
   }
 
   function save() {
