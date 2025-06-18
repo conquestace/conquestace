@@ -1,11 +1,12 @@
 ---
 import BaseLayout     from '../layouts/BaseLayout.astro';
-import WildcardLoader from '../components/WildcardLoader.astro';
-import PromptBuilder  from '../components/PromptBuilder.astro';
-import LLMControls    from '../components/LLMControls.astro';
-import LLMConfig      from '../components/LLMConfig.astro';
-import TerminalOutput from '../components/TerminalOutput.astro';
-import PromptSaver    from '../components/PromptSaver.astro';
+import WildcardLoader     from '../components/WildcardLoader.astro';
+import PromptBuilder      from '../components/PromptBuilder.astro';
+import LLMControls        from '../components/LLMControls.astro';
+import LLMConfig          from '../components/LLMConfig.astro';
+import SystemPromptPreset from '../components/SystemPromptPreset.astro';
+import TerminalOutput     from '../components/TerminalOutput.astro';
+import PromptSaver        from '../components/PromptSaver.astro';
 ---
 
 <BaseLayout title="Wildcard Prompt Generator">
@@ -14,16 +15,19 @@ import PromptSaver    from '../components/PromptSaver.astro';
     <!-- 0. configure llm -->
     <LLMConfig />
 
-    <!-- 1. defaults + drag-drop -->
+    <!-- 1. system preset -->
+    <SystemPromptPreset />
+
+    <!-- 2. defaults + drag-drop -->
     <WildcardLoader />
 
-    <!-- 2. arrange & build, preview -->
+    <!-- 3. arrange & build, preview -->
     <PromptBuilder />
 
-    <!-- 3. extra instructions + send -->
+    <!-- 4. send to llm -->
     <LLMControls />
 
-    <!-- 4. live log -->
+    <!-- 5. live log -->
     <TerminalOutput />
     <PromptSaver />
 
