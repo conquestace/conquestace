@@ -4,11 +4,7 @@ const bad  = (m) => ({ statusCode: 400, body: JSON.stringify({ error: m }) });
 const fail = (m) => ({ statusCode: 500, body: JSON.stringify({ error: m }) });
 
 /* ─── system-prompt presets ─── */
-const SYSTEM_PRESETS = {
-  danbooru:          'You are a Danbooru-style prompt refinement model. Your job is to take a raw list of wildcard-generated tags and reorganize them into a coherent, high-quality Danbooru-style prompt. \n The final output must follow this strict tag format: \n <quality tags>, <artists>, <character>, <outfits>, <setting>, <meta>, <other> \n - Tags must be space-separated, lowercase, do not use underscores. \n - Do not invent or add new tags. \n - Preserve all provided tags, but sort them into the correct semantic order. \n - Do not include explanations or notes — return only the refined prompt. \n Output only the final prompt as a single line of space-separated Danbooru tags. If the user input is illegal then output BREAK and nothing else.',
-  'natural-language':'You are a natural language prompt refinement engine. \n Your task is to take a loosely structured input generated from wildcard terms (such as character names, clothing, environments, and styles), and rewrite it into a grammatically correct, vivid, and coherent natural language prompt suitable for high-quality image generation. \n Your output should be fluent and visually descriptive, capturing the key ideas implied by the tags while improving structure and detail. Use proper sentence flow and artistic language.\n ❗ Do not invent new content. Do not omit any meaningful tags unless absolutely necessary for clarity. \n Respond with only the final refined prompt as a single English sentence — no extra commentary, no bullet points, no notes. \n If the input is invalid or contains illegal content, output only: \n BREAK',
-  default:           'You are a helpful prompt-refiner.'
-};
+import SYSTEM_PRESETS from './systemPrompts.json' with { type: 'json' };
 
 /* ─── simple policy guard (OpenAI Moderations) ─── */
 /* ---------------- block thresholds ----------------
@@ -70,13 +66,21 @@ export const handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return bad('Invalid JSON payload.'); }
 
-  const { initialPrompt, preset = 'default', instructions = '', llm = {}, geminiKey } = body;
+  const {
+    initialPrompt,
+    systemPrompt,
+    preset = 'default',
+    extraInstructions = '',
+    insert = 'after',
+    llm = {},
+    geminiKey
+  } = body;
   if (!initialPrompt?.trim()) return bad('initialPrompt missing.');
   const config = { ...llm };
   if (!config.geminiKey) config.geminiKey = geminiKey;
 
   /* 2 ─ content-policy gate ------------------------------------------- */
-  const combinedInput = `${initialPrompt}\n\n${instructions}`;
+  const combinedInput = initialPrompt;
   if (await violatesPolicy(combinedInput, config.openaiKey)) {
     return bad('Prompt rejected by content policy.');
   }
@@ -85,16 +89,18 @@ export const handler = async (event) => {
 
   /* 3 ─ build system prompt ------------------------------------------- */
   const basePrompt   =
-    (provider === 'openai' && config.systemPrompt?.trim())
-      ? config.systemPrompt.trim()
-      : SYSTEM_PRESETS[preset] ?? SYSTEM_PRESETS.default;
-  const systemPrompt = instructions
-    ? `${basePrompt}\n\n${instructions}`
-    :  basePrompt;
+    systemPrompt?.trim() ||
+    (provider === 'openai' && config.systemPrompt?.trim()) ||
+    SYSTEM_PRESETS[preset] ||
+    SYSTEM_PRESETS.default;
+
+  const userMsg = insert === 'before'
+    ? `${extraInstructions}\n\n${initialPrompt}`
+    : `${initialPrompt}${extraInstructions ? `\n\n${extraInstructions}` : ''}`;
 
   const messages = [
-    { role: 'system', content: systemPrompt },
-    { role: 'user',   content: initialPrompt }
+    { role: 'system', content: basePrompt.trim() },
+    { role: 'user',   content: userMsg.trim() }
   ];
 
   const model = config.model || (provider === 'gemini'
