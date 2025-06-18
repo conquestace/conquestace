@@ -8,6 +8,18 @@
   <div class="bg-slatecard p-4 rounded w-[90%] max-w-md text-lightblue space-y-4 font-mono">
     <h2 class="text-white text-lg">LLM Configuration</h2>
 
+    <div class="flex items-center gap-2">
+      <label class="block flex-1">Profile
+        <select id="slot-select" class="bg-slatecard p-1 rounded ml-2 w-full"></select>
+      </label>
+      <button id="slot-add" class="bg-green-700 text-white px-2 rounded">＋</button>
+      <button id="slot-del" class="bg-slategray text-white px-2 rounded">🗑</button>
+    </div>
+
+    <label class="block">Name
+      <input id="slot-name" type="text" class="bg-slatecard p-1 rounded ml-2 w-full" />
+    </label>
+
     <label class="block">Provider
       <select id="llm-provider" class="bg-slatecard p-1 rounded ml-2">
         <option value="openai">OpenAI</option>
@@ -32,6 +44,7 @@
       <label class="block">Gemini API Key
         <input id="gemini-key" type="password" placeholder="AIza..."
                class="bg-slatecard p-1 rounded ml-2 w-full" />
+        <a href="https://ai.google.dev/gemini-api/docs/api-key" target="_blank" class="ml-2 text-sky underline">Get key</a>
       </label>
     </div>
 
@@ -66,17 +79,61 @@
   const localKey   = document.getElementById('local-key');
   const saveBtn    = document.getElementById('llm-save');
   const cancelBtn  = document.getElementById('llm-cancel');
+  const slotSel    = document.getElementById('slot-select');
+  const slotAdd    = document.getElementById('slot-add');
+  const slotDel    = document.getElementById('slot-del');
+  const slotName   = document.getElementById('slot-name');
+
+  function loadSlots() {
+    const raw = localStorage.getItem('llmSlots');
+    let data = { active: 0, slots: [] };
+    try { data = raw ? JSON.parse(raw) : data; } catch {}
+    if (!data.slots.length) {
+      data.slots.push({
+        name: 'Gemini',
+        provider: 'gemini',
+        model: 'gemini-2.0-flash',
+        geminiKey: '',
+        openaiKey: '',
+        localUrl: '',
+        localKey: ''
+      });
+      data.active = 0;
+    }
+    return data;
+  }
+
+  function saveSlots(data) {
+    localStorage.setItem('llmSlots', JSON.stringify(data));
+  }
+
+  let slots = loadSlots();
+
+  function populateSelect() {
+    slotSel.innerHTML = '';
+    slots.slots.forEach((s, i) => {
+      const opt = document.createElement('option');
+      opt.value = i;
+      opt.textContent = s.name || `Slot ${i+1}`;
+      slotSel.appendChild(opt);
+    });
+    slotSel.value = slots.active;
+  }
 
   function load() {
-    const conf = JSON.parse(localStorage.getItem('llmConfig') || '{}');
+    slots = loadSlots();
+    populateSelect();
+    const conf = slots.slots[slots.active];
     provider.value  = conf.provider || 'openai';
     model.value     = conf.model   || '';
     gemKey.value    = conf.geminiKey || '';
     openaiKey.value = conf.openaiKey || '';
     localUrl.value  = conf.localUrl || '';
     localKey.value  = conf.localKey || '';
+    slotName.value  = conf.name || '';
     updateFields();
   }
+
 
   function updateFields() {
     gemField.classList.toggle('hidden', provider.value !== 'gemini');
@@ -93,16 +150,47 @@
 
   function save() {
     const conf = {
-      provider    : provider.value,
-      model       : model.value.trim(),
-      geminiKey   : gemKey.value.trim(),
-      openaiKey   : openaiKey.value.trim(),
-      localUrl    : localUrl.value.trim(),
-      localKey    : localKey.value.trim()
+      name       : slotName.value.trim() || `Slot ${slots.active + 1}`,
+      provider   : provider.value,
+      model      : model.value.trim(),
+      geminiKey  : gemKey.value.trim(),
+      openaiKey  : openaiKey.value.trim(),
+      localUrl   : localUrl.value.trim(),
+      localKey   : localKey.value.trim()
     };
+    slots.slots[slots.active] = conf;
+    saveSlots(slots);
     localStorage.setItem('llmConfig', JSON.stringify(conf));
+    populateSelect();
+    slotSel.value = slots.active;
     window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: conf }));
     overlay.classList.add('hidden');
+  }
+
+  function addSlot() {
+    const conf = {
+      name      : 'New Slot',
+      provider  : 'openai',
+      model     : 'GPT-4o mini',
+      geminiKey : '',
+      openaiKey : '',
+      localUrl  : '',
+      localKey  : ''
+    };
+    slots.slots.push(conf);
+    slots.active = slots.slots.length - 1;
+    saveSlots(slots);
+    localStorage.setItem('llmConfig', JSON.stringify(conf));
+    load();
+  }
+
+  function deleteSlot() {
+    if (slots.slots.length <= 1) return;
+    slots.slots.splice(slots.active, 1);
+    slots.active = Math.max(0, slots.active - 1);
+    saveSlots(slots);
+    localStorage.setItem('llmConfig', JSON.stringify(slots.slots[slots.active]));
+    load();
   }
 
   openBtn.addEventListener('click', () => {
@@ -112,8 +200,17 @@
   cancelBtn.addEventListener('click', () => overlay.classList.add('hidden'));
   provider.addEventListener('change', updateFields);
   saveBtn.addEventListener('click', save);
+  slotAdd.addEventListener('click', addSlot);
+  slotDel.addEventListener('click', deleteSlot);
+  slotSel.addEventListener('change', () => {
+    slots.active = Number(slotSel.value);
+    saveSlots(slots);
+    localStorage.setItem('llmConfig', JSON.stringify(slots.slots[slots.active]));
+    load();
+    window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: slots.slots[slots.active] }));
+  });
 
   // initial config dispatch
   load();
-  window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: JSON.parse(localStorage.getItem('llmConfig') || '{}') }));
+  window.dispatchEvent(new CustomEvent('llm-config-changed', { detail: slots.slots[slots.active] }));
 </script>

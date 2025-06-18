@@ -128,7 +128,17 @@
       messages.push({ role: "user", content: userInput });
 
       try {
-        const llmConf = JSON.parse(localStorage.getItem('llmConfig') || '{}');
+        let llmConf = {};
+        const slotsRaw = localStorage.getItem('llmSlots');
+        if (slotsRaw) {
+          try {
+            const data = JSON.parse(slotsRaw);
+            llmConf = data.slots?.[data.active] || {};
+          } catch {}
+        }
+        if (!Object.keys(llmConf).length) {
+          llmConf = JSON.parse(localStorage.getItem('llmConfig') || '{}');
+        }
         const response = await fetch("/.netlify/functions/llm-router", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
