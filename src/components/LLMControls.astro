@@ -30,20 +30,14 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
   </label>
   <textarea id="system-box" rows="4" class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
 
-  <script type="application/json" id="preset-data">
-    {JSON.stringify(SYSTEM_PRESETS)}
-  </script>
 </div>
 
-<script is:client>
+<script define:vars={{ PRESETS: SYSTEM_PRESETS }} is:client>
   const btn       = document.getElementById('llm-primary-btn');
   const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
   const sysBox    = document.getElementById('system-box');
   const placeSel  = document.getElementById('instr-place');
-
-  const PRESETS = JSON.parse(document.getElementById('preset-data').textContent);
-  document.getElementById('preset-data').remove();
 
   let llmConfig      = {};
   let initialPrompt  = '';

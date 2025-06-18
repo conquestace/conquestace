@@ -139,7 +139,7 @@ export const handler = async(event)=>{
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
         body:JSON.stringify({
-          systemInstruction:{ parts:[{ text:systemPrompt }] },
+          systemInstruction:{ parts:[{ text: finalPrompt }] },
           contents:[ { parts:[{ text:initialPrompt.trim() }] } ],
           generationConfig:{ maxOutputTokens:512 }
         })
