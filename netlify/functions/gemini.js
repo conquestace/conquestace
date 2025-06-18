@@ -1,4 +1,5 @@
 import { isAuthorized } from "./_auth.js";
+import SYSTEM_PRESETS  from './systemPrompts.json' assert { type: 'json' };
 
 export async function handler(event) {
   if(!isAuthorized(event)) {
