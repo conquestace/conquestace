@@ -38,6 +38,14 @@
   let initialPrompt = '';
   let systemPrompt  = '';
 
+  /* load existing LLM config immediately (may fire before listeners attach) */
+  try {
+    const stored = localStorage.getItem('llmConfig');
+    if (stored) {
+      llmConfig = JSON.parse(stored);
+    }
+  } catch {}
+
   /* get current prompts immediately if available */
   const spBox = document.getElementById('spBox');
   if (spBox) {
