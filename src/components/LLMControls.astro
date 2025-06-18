@@ -54,6 +54,11 @@
     update();
   });
 
+  // grab existing values if events fired before hydration
+  initialPrompt = document.getElementById('prompt-box')?.value.trim() || '';
+  systemPrompt  = document.getElementById('spBox')?.value.trim() || '';
+  update();
+
   /* click → POST to Netlify function */
   btn.addEventListener('click', async () => {
     const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
