@@ -1,0 +1,24 @@
+---
+import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert { type: 'json' };
+---
+<div class="flex flex-col gap-4" data-system-prompt>
+  <label class="font-medium text-white">System prompt preset
+    <select id="llmPreset" class="bg-slatecard p-1 rounded ml-2">
+      <option value="danbooru">Danbooru preset</option>
+      <option value="natural-language">Natural‑language preset</option>
+      <option value="custom">Custom</option>
+    </select>
+  </label>
+  <textarea id="system-box" rows="4" class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
+</div>
+
+<script define:vars={{ PRESETS: SYSTEM_PRESETS }} is:client>
+  const presetSel = document.getElementById('llmPreset');
+  const sysBox    = document.getElementById('system-box');
+
+  function applyPreset() {
+    sysBox.value = PRESETS[presetSel.value] || '';
+  }
+  presetSel.addEventListener('change', applyPreset);
+  applyPreset();
+</script>

@@ -3,10 +3,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
 ---
 
 <div class="flex flex-col gap-4" data-llm>
-  <!-- Free‑form LLM instructions -->
-  <label class="font-medium text-white">📄 Extra instructions to the LLM</label>
-  <textarea id="llm-notes" rows="3" class="w-full bg-slatecard p-2 rounded resize-y font-mono"></textarea>
-
   <!-- Instruction placement toggle -->
   <label class="font-medium text-white">Instructions placement
     <select id="instr-place" class="bg-slatecard p-1 rounded ml-2">
@@ -34,7 +30,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
 
 <script define:vars={{ PRESETS: SYSTEM_PRESETS }} is:client>
   const btn       = document.getElementById('llm-primary-btn');
-  const notes     = document.getElementById('llm-notes');
   const presetSel = document.getElementById('llmPreset');
   const sysBox    = document.getElementById('system-box');
   const placeSel  = document.getElementById('instr-place');
@@ -65,11 +60,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
     refreshBtn();
   });
 
-  function applyPreset() {
-    sysBox.value = PRESETS[presetSel.value] || '';
-  }
-  presetSel.addEventListener('change', applyPreset);
-  applyPreset();
 
   // --- click handler --------------------------------------------------
   btn.addEventListener('click', async () => {
@@ -91,7 +81,6 @@ import SYSTEM_PRESETS from '../../netlify/functions/systemPrompts.json' assert {
           initialPrompt,
           preset: presetSel.value,
           systemPrompt: sysBox.value.trim(),
-          instructions: notes.value.trim(),
           instrPos: placeSel.value,
           llm: llmConfig
         })
