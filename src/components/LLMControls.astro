@@ -38,6 +38,13 @@
   let initialPrompt = '';
   let systemPrompt  = '';
 
+  /* get current system prompt immediately if available */
+  const spBox = document.getElementById('spBox');
+  if (spBox) {
+    systemPrompt = spBox.value.trim();
+  }
+  update();
+
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
     initialPrompt = e.detail.trim();
