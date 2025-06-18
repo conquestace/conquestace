@@ -15,9 +15,9 @@ I’m **Ashiful Bhuiyan** (aka **ConquestAce**). I do math and physics, develop 
 
 | Project | Description |
 |--------|-------------|
-| [`tab`](https://github.com/conquestace/tab/) | A custom new tab launcher with glitchy visuals, and command parsing. |
-| [`terminal-overlay`](https://github.com/conquestace/terminal-overlay/) | A terminal that overlays over the website.  |
-| [`wildcarder`] | A prompt generator using wildcards. |
+| [`tab`](https://github.com/conquestace/conquestace/) | A custom new tab launcher with glitchy visuals, and command parsing. |
+| [`terminal-overlay`](https://github.com/conquestace/conquestace) | A terminal that overlays over the website.  |
+| [`wildcarder`](https://github.com/conquestace/conquestace) | A prompt generator using wildcards. |
 
 
 > ⚠️ You may encounter unfinished or in-progress repositories — that's part of the fun.
