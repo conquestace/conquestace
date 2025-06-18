@@ -27,6 +27,7 @@
   const btn   = document.getElementById('send-btn');
   const notes = document.getElementById('llm-notes');
   const instrFirst = document.getElementById('instrFirst');
+  const spBox = document.getElementById('spBox');
 
   let llmConfig = {};
 
@@ -36,7 +37,8 @@
   }
 
   let initialPrompt = '';
-  let systemPrompt  = '';
+  let systemPrompt  = spBox?.value.trim() || '';
+  update();
 
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
