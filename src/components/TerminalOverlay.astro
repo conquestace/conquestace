@@ -100,7 +100,7 @@
       const userInput = input.value.trim();
       if (!userInput) return;
 
-      if (userInput.toLowerCase() === "new chat") {
+      if (userInput.toLowerCase() === "new chat" || userInput.toLowerCase() === "reset" || userInput.toLowerCase() === "clear") {
         clearHistory();
         log.innerHTML = "";
         const resetMsg = document.createElement("div");
