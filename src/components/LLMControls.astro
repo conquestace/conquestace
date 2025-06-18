@@ -29,14 +29,22 @@
   const instrFirst = document.getElementById('instrFirst');
 
   let llmConfig = {};
+  let initialPrompt = '';
+  let systemPrompt  = '';
 
+  /* load any existing values if other components fired before us */
+  try {
+    llmConfig = JSON.parse(localStorage.getItem('llmConfig')) || {};
+  } catch {}
+  const box = document.getElementById('prompt-box');
+  if (box) initialPrompt = box.value.trim();
+  const sp = document.getElementById('spBox');
+  if (sp) systemPrompt = sp.value.trim();
+  update();
   function update() {
     const needsKey = llmConfig.provider === 'gemini' && !llmConfig.geminiKey;
     btn.disabled = !initialPrompt || !systemPrompt || needsKey;
   }
-
-  let initialPrompt = '';
-  let systemPrompt  = '';
 
   /* get initial prompt from PromptBuilder */
   window.addEventListener('initial-prompt', e => {
