@@ -83,7 +83,7 @@ export const handler = async(event)=>{
   try{ body = JSON.parse(event.body||'{}'); }
   catch{return bad('Invalid JSON payload.');}
 
-  const { initialPrompt, preset='default', instructions='', llm={}, geminiKey } = body;
+  const { initialPrompt, preset='default', instructions='', instrPos='end', llm={}, geminiKey } = body;
   if(!initialPrompt?.trim()) return bad('initialPrompt missing.');
 
   const config = { ...llm };
@@ -98,7 +98,12 @@ export const handler = async(event)=>{
 
   // 3) Build system prompt (preset‑only)
   const basePrompt    = SYSTEM_PRESETS[preset] ?? SYSTEM_PRESETS.default;
-  const systemPrompt  = instructions ? `${basePrompt}\n\n${instructions}` : basePrompt;
+  let systemPrompt = basePrompt;
+  if (instructions) {
+    systemPrompt = instrPos === 'start'
+      ? `${instructions}\n\n${basePrompt}`
+      : `${basePrompt}\n\n${instructions}`;
+  }
   const messages      = [ { role:'system', content:systemPrompt }, { role:'user', content:initialPrompt } ];
    const rawModel = config.model || (provider === 'gemini' ? 'gemini-2.0-flash' : process.env.OPENAI_MODEL || 'gpt-4o-mini');
   const model    = normalizeModel(rawModel, provider);
