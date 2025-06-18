@@ -58,15 +58,21 @@
       localStorage.removeItem(TIMESTAMP_KEY);
     }
 
+    function appendLine(role, text, logEl) {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      span.className = 'text-sky';
+      span.textContent = role === 'user' ? 'hacker@conquestace' : 'sys';
+      div.appendChild(span);
+      div.append(role === 'user' ? ':~$ ' : ': ');
+      div.append(document.createTextNode(text));
+      logEl.appendChild(div);
+    }
+
     function renderHistory(log) {
       const history = loadHistory();
       for (const entry of history) {
-        const div = document.createElement("div");
-        const label = entry.role === "user"
-          ? '<span class="text-sky">hacker@conquestace</span>:~$ '
-          : '<span class="text-sky">sys</span>: ';
-        div.innerHTML = label + entry.text;
-        log.appendChild(div);
+        appendLine(entry.role, entry.text, log);
       }
       log.scrollTop = log.scrollHeight;
     }
@@ -102,19 +108,15 @@
 
       if (userInput.toLowerCase() === "new chat" || userInput.toLowerCase() === "reset" || userInput.toLowerCase() === "clear") {
         clearHistory();
-        log.innerHTML = "";
-        const resetMsg = document.createElement("div");
-        resetMsg.innerHTML = `<span class="text-sky">sys</span>: Chat reset. New session initialized.`;
-        log.appendChild(resetMsg);
-        saveToHistory("sys", "Chat reset. New session initialized.");
+        log.textContent = '';
+        appendLine('sys', 'Chat reset. New session initialized.', log);
+        saveToHistory('sys', 'Chat reset. New session initialized.');
         input.value = '';
         return;
       }
 
-      const userLine = document.createElement("div");
-      userLine.innerHTML = `<span class="text-sky">hacker@conquestace</span>:~$ ${userInput}`;
-      log.appendChild(userLine);
-      saveToHistory("user", userInput);
+      appendLine('user', userInput, log);
+      saveToHistory('user', userInput);
 
       input.value = '';
       log.scrollTop = log.scrollHeight;
@@ -137,17 +139,13 @@
         const data = await response.json();
         const output = data.text ?? "[no response]";
 
-        const sysLine = document.createElement("div");
-        sysLine.innerHTML = `<span class="text-sky">sys</span>: ${output}`;
-        log.appendChild(sysLine);
+        appendLine('sys', output, log);
         saveToHistory("sys", output);
 
         log.scrollTop = log.scrollHeight;
       } catch (err) {
-        const errLine = document.createElement("div");
-        errLine.innerHTML = `<span class="text-sky">sys</span>: Error: ${err.message}`;
-        log.appendChild(errLine);
-        saveToHistory("sys", `Error: ${err.message}`);
+        appendLine('sys', `Error: ${err.message}`, log);
+        saveToHistory('sys', `Error: ${err.message}`);
 
         log.scrollTop = log.scrollHeight;
       }

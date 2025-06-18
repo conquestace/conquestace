@@ -13,7 +13,12 @@
   const term = document.getElementById('terminal');
 
   window.addEventListener('terminal-msg', e => {
-    term.innerHTML = '<span class="text-green-400">&gt; </span>' + e.detail;
+    term.replaceChildren();
+    const prefix = document.createElement('span');
+    prefix.className = 'text-green-400';
+    prefix.textContent = '> ';
+    term.appendChild(prefix);
+    term.appendChild(document.createTextNode(e.detail));
     term.scrollTop = term.scrollHeight;
   });
 </script>

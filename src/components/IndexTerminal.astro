@@ -52,8 +52,31 @@
     const $input = document.getElementById('inline-input');
     const $log  = document.getElementById('inline-log');
 
-    const logSys  = t => $log.innerHTML += `<div><span class="text-sky">sys</span>: ${t}</div>`;
-    const logLine = t => $log.innerHTML += `<div><span class="text-sky">conquestace@home</span>:~${pathStack.length?'/'+pathStack.join('/'):''}$ ${t}</div>`;
+    const logSys = (t) => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      span.className = 'text-sky';
+      span.textContent = 'sys';
+      div.appendChild(span);
+      div.append(': ');
+      div.append(document.createTextNode(t));
+      $log.appendChild(div);
+    };
+    const logSysHTML = (html) => {
+      const div = document.createElement('div');
+      div.innerHTML = `<span class="text-sky">sys</span>: ${html}`;
+      $log.appendChild(div);
+    };
+    const logLine = (t) => {
+      const div = document.createElement('div');
+      const span = document.createElement('span');
+      span.className = 'text-sky';
+      span.textContent = 'conquestace@home';
+      div.appendChild(span);
+      div.append(`:~${pathStack.length ? '/' + pathStack.join('/') : ''}$ `);
+      div.append(document.createTextNode(t));
+      $log.appendChild(div);
+    };
     const scroll  = () => $log.scrollTop = $log.scrollHeight;
 
     /* ── 3. Directory listing ── */
@@ -70,7 +93,7 @@
           ? `<a href="${entry}" target="_blank" class="terminal-file terminal-link touch" tabindex="0">${name}</a>  `
           : `<span class="terminal-folder touch" data-cd="${name}" tabindex="0">${name}/</span>  `;
       }
-      logSys(html.trim());
+      logSysHTML(html.trim());
     }
 
     /* ── 4. Navigation ── */
@@ -114,7 +137,7 @@
         window.open(dir[cmd], '_blank');
         logSys(`Opening ${cmd}…`);
       } else {
-        logSys('Unknown command or file. Try <code>ls</code>.');
+        logSysHTML('Unknown command or file. Try <code>ls</code>.');
       }
       scroll();
     });
