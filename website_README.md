@@ -51,7 +51,7 @@ A lightweight Astro-powered tool for turning **wildcard `.txt` files** into **re
 
 | Module                                | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `WildcardLoader.astro`                | *Client-only island* for loading `.txt` wildcard files:<br>• **Drag & drop** or **browse** files manually.<br>• **Load defaults** from Hugging Face (`danbooru`, `natural-language`).<br>• **Multi-level cherry-picking**:<br>  1️⃣ **Collection selector** (top-level)<br>  2️⃣ **Category pills** (e.g., `clothing`, `styles`)<br>  3️⃣ **File pills** (wrap + multi-select)<br>• Can load **entire categories** *or* only selected files.<br>• Auto-wraps file pills to new lines.<br>• Remove files individually 🗑️ or **clear all** 🧹.<br>• Emits `wildcards-loaded` with full `{ [filename]: lines[] }` structure. |
+| `WildcardLoader.astro`                | *Client-only island* for loading `.txt` wildcard files:<br>• **Drag & drop** or **browse** files manually.<br>• **Load defaults** from Hugging Face (`danbooru`, `natural-language`).<br>• **Directory tree** with checkboxes for cherry‑picking files.<br>• Remove files individually 🗑️ or **clear all** 🧹.<br>• Emits `wildcards-loaded` with full `{ [filename]: lines[] }` structure. |
 | `PromptBuilder.astro`                 | Builds the **initial prompt** by randomly sampling lines from selected wildcards.<br>• User controls sample count per file.<br>• Supports **🔄 Re-roll**, manual editing, and live broadcasting via `initial-prompt`.                                                                                                                                                                                                                                                                                                                     |
 | `LLMConfig.astro`                     | Button to configure your LLM choice (**OpenAI**, **Gemini**, or **Local**).<br>• Lets you set model name and API keys.<br>• Saved in `sessionStorage`.
 | `LLMControls.astro`                   | Sends prompts to the backend:<br>• Uses the selected system‑prompt preset (`danbooru`, `natural-language`, custom).<br>• POSTs everything to `/.netlify/functions/generatePrompt` using your `LLMConfig` settings.
@@ -82,9 +82,8 @@ Loader pulls manifests from:
 Supports:
 
 * ✅ **Collection selection** (danbooru / natural-language)
-* ✅ **Category pills** (e.g., `clothing`, `styles`, etc.)
-* ✅ **File pills** (multi-selectable, wrapped to fit screen)
-* ✅ Loading **entire categories** or just selected files
+* ✅ **Directory tree** to pick specific files
+* ✅ Loading **entire directories** or just selected files
 
 ---
 
@@ -131,8 +130,7 @@ Supports:
 | **Add a new system-prompt preset**     | Add key in `SYSTEM_PRESETS` (Netlify function) and `<option>` in `LLMControls.astro`.                 |
 | **Adjust moderation strictness**       | Edit per-category `BLOCK_THRESHOLDS` in `generatePrompt.js`.                                          |
 | **Change sample count per file**       | Modify PromptBuilder’s sampling logic.                                                                |
-| **Tweak file/category UI styling**     | Edit Tailwind class names in `WildcardLoader.astro`.                                                  |
-| **Change file pill wrapping behavior** | Adjust CSS: use `flex-wrap` and `max-h` in `.file-wrap`.                                              |
+| **Tweak tree UI styling**              | Edit Tailwind class names in `WildcardLoader.astro` and `.tree` CSS rules.                            |
 
 ---
 

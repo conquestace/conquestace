@@ -14,13 +14,9 @@
   </label>
 </div>
 
-
-<!-- ───── pill bars ───── -->
-<label class="text-lightblue text-sm block mt-2">Categories:</label>
-<div id="categoryBar" class="scroll-bar"></div>
-
-<label class="text-lightblue text-sm block mt-2">Files:</label>
-<div id="fileBar" class="file-wrap"></div>
+<!-- ───── directory tree ───── -->
+<label class="text-lightblue text-sm block mt-2">Wildcards:</label>
+<div id="treeContainer" class="tree"></div>
 
 <!-- ───── drag-drop box & file list ───── -->
 <div class="space-y-3 mt-4">
@@ -53,15 +49,13 @@
   const input     = document.getElementById('fileInput');
   const listEl    = document.getElementById('fileList');
   const collSel   = document.getElementById('collectionSelector');
-  const catBar    = document.getElementById('categoryBar');
-  const fileBar   = document.getElementById('fileBar');
+  const treeEl    = document.getElementById('treeContainer');
   const loadBtn   = document.getElementById('loadDefaults');
   const clearBtn  = document.getElementById('clearWildcards');
 
   /* ───────── state ───────── */
-  const store         = new Map();          // filename → lines[]
-  const selectedCats  = new Set();          // active category ids
-  const selectedFiles = new Set();          // active file names
+  const store         = new Map();          // path → lines[]
+  const selectedPaths = new Set();          // checked file paths
   const manifestCache = {};                 // collection id → manifest[]
 
   /* ───────── utility ───────── */
@@ -112,68 +106,79 @@
     return data;
   }
 
-  /* ───────── category pills ───────── */
-  async function populateCategories() {
-    catBar.textContent=''; fileBar.textContent=''; selectedCats.clear(); selectedFiles.clear();
+  /* ───────── build tree ───────── */
+  function insert(node, parts, entry) {
+    if (parts.length === 1) {
+      node.files ??= [];
+      node.files.push({ label: parts[0], path: entry.path });
+      return;
+    }
+    const head = parts[0];
+    node.dirs ??= {};
+    node.dirs[head] ??= {};
+    insert(node.dirs[head], parts.slice(1), entry);
+  }
+
+  function render(node, parent) {
+    if (node.dirs) {
+      Object.keys(node.dirs).sort().forEach(name => {
+        const details = document.createElement('details');
+        const summary = document.createElement('summary');
+        summary.textContent = name;
+        details.appendChild(summary);
+        const ul = document.createElement('ul');
+        render(node.dirs[name], ul);
+        details.appendChild(ul);
+        parent.appendChild(details);
+      });
+    }
+    if (node.files) {
+      node.files.sort((a,b)=>a.label.localeCompare(b.label)).forEach(f => {
+        const li = document.createElement('li');
+        const label = document.createElement('label');
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.onchange = () => {
+          if (cb.checked) selectedPaths.add(f.path);
+          else selectedPaths.delete(f.path);
+        };
+        label.append(cb, document.createTextNode(' ' + f.label));
+        li.appendChild(label);
+        parent.appendChild(li);
+      });
+    }
+  }
+
+  async function populateTree() {
+    treeEl.textContent='';
+    selectedPaths.clear();
     const manifest = await getManifest(collSel.value);
-    const cats = [...new Set(manifest.map(e=>e.category.split('/').pop()))].sort();
-
-    cats.forEach(cat => {
-      const pill = document.createElement('div');
-      pill.textContent = cat; pill.className = 'pill';
-      pill.onclick = () => {
-        if (selectedCats.has(cat)) {
-          selectedCats.delete(cat); pill.classList.remove('active');
-          if (fileBar.dataset.cat === cat) { fileBar.textContent=''; selectedFiles.clear(); }
-        } else {
-          selectedCats.add(cat); pill.classList.add('active');
-          populateFiles(cat, manifest);
-        }
-      };
-      catBar.appendChild(pill);
+    const root = {};
+    manifest.forEach(e => {
+      const parts = e.path.split('/').slice(1); // skip collection id
+      insert(root, parts, e);
     });
+    const ul = document.createElement('ul');
+    render(root, ul);
+    treeEl.appendChild(ul);
   }
 
-  /* ───────── file pills ───────── */
-  function populateFiles(cat, manifest) {
-    fileBar.textContent=''; selectedFiles.clear();
-    fileBar.dataset.cat = cat;
-
-    manifest.filter(e => e.category.endsWith('/'+cat))
-            .forEach(e => {
-              const pill = document.createElement('div');
-              pill.textContent = e.name; pill.className = 'pill';
-              pill.onclick = () => {
-                if (selectedFiles.has(e.name)) {
-                  selectedFiles.delete(e.name); pill.classList.remove('active');
-                } else {
-                  selectedFiles.add(e.name); pill.classList.add('active');
-                }
-              };
-              fileBar.appendChild(pill);
-            });
-  }
-
-  collSel.addEventListener('change', populateCategories);
-  populateCategories();             // initial load
+  collSel.addEventListener('change', populateTree);
+  populateTree();             // initial load
 
   /* ───────── load defaults ───────── */
   loadBtn.onclick = async () => {
     const coll   = collSel.value;
     const manifest = await getManifest(coll);
 
-    const wantAllCats  = selectedCats.size === 0;
-    const wantAllFiles = selectedFiles.size === 0;
+    const wantAll = selectedPaths.size === 0;
 
-    for (const { name, path, category } of manifest) {
-      const catLeaf = category.split('/').pop();
-
-      if (!wantAllCats && !selectedCats.has(catLeaf)) continue;
-      if (!wantAllFiles && !selectedFiles.has(name))  continue;
-      if (store.has(name)) continue;
+    for (const { path } of manifest) {
+      if (!wantAll && !selectedPaths.has(path)) continue;
+      if (store.has(path)) continue;
 
       const txt = await fetch(HF_BASE + path).then(r=>r.text());
-      store.set(name, txt.trim().split(/\r?\n/));
+      store.set(path, txt.trim().split(/\r?\n/));
     }
     updateList(); dispatch();
   };

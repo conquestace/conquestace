@@ -69,3 +69,8 @@ body.matrix-mode footer {
            max-h-32 overflow-y-auto mt-1;  /* 8 rem tall before vertical scroll */
   }
   .file-wrap::-webkit-scrollbar { width: 0; height: 0; }  /* hide thin Y-scroll */
+
+  /* directory tree */
+  .tree ul { @apply pl-4 list-disc; }
+  .tree label { @apply cursor-pointer text-lightblue text-sm; }
+  .tree input[type="checkbox"] { @apply mr-1 accent-mathblue; }
