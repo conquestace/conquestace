@@ -1,11 +1,19 @@
 [functions]
 directory = "netlify/functions"
 
+[[plugins]]
+  package = "netlify-plugin-csp-generator"
+
+  [plugins.inputs]
+    buildDir = "dist"
+    # Optional: for CSP Report-Only mode and violation endpoint
+    reportOnly = false
+    reportURI = "/.netlify/functions/__csp-violations"
+
 [[headers]]
   for = "/*"
   [headers.values]
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
-    Content-Security-Policy = "default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data:; font-src *; connect-src *; frame-ancestors 'none';"
     X-Frame-Options = "SAMEORIGIN"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "no-referrer-when-downgrade"
