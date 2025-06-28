@@ -1,0 +1,70 @@
+---
+// 404.astro
+import BaseLayout from '../layouts/BaseLayout.astro'; // adjust if needed
+---
+
+<BaseLayout title="404 Not Found">
+  <div class="min-h-screen flex flex-col items-center justify-center bg-midnight text-lightblue select-none relative overflow-hidden">
+    <!-- Glitch scanlines -->
+    <div class="absolute inset-0 pointer-events-none z-0" style="background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(30,58,138,0.08) 5px);"></div>
+    <!-- Centered content -->
+    <div class="z-10 flex flex-col items-center">
+      <div class="text-[6rem] font-mono font-bold tracking-tight text-sky relative glitch" data-text="404">
+        404
+      </div>
+      <div class="text-xl md:text-2xl font-mono text-softgray mt-2 animate-pulse">
+        SYSTEM ERROR: PAGE NOT FOUND
+      </div>
+      <div class="mt-8 flex flex-col items-center space-y-2 text-[1rem] text-lightblue font-mono">
+        <span class="text-sky">conquestace@home:~$</span> <span class="animate-blink">_</span>
+        <span class="opacity-80 mt-2">"Did you really expect to find this node?"</span>
+        <span class="opacity-80">Try <a href="/" class="text-hoverblue underline hover:text-sky transition">returning home</a> or initiate a new protocol.</span>
+      </div>
+    </div>
+    <!-- Glitch tiger as faint BG, unclickable and centered -->
+    <img src="/glitchtiger.gif" alt="" class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none opacity-10 w-[70vw] max-w-3xl z-0" draggable="false" />
+    <style>
+      .glitch {
+        position: relative;
+      }
+      .glitch::after, .glitch::before {
+        content: attr(data-text);
+        position: absolute;
+        left: 0; top: 0;
+        width: 100%; height: 100%;
+        opacity: 0.7;
+        clip-path: inset(0 0 55% 0);
+        pointer-events: none;
+      }
+      .glitch::before {
+        color: #ff003c; /* Red glitch */
+        animation: glitchTop 2.1s infinite linear alternate-reverse;
+        z-index: 2;
+      }
+      .glitch::after {
+        color: #1b91d6; /* Blue glitch */
+        animation: glitchBot 1.9s infinite linear alternate-reverse;
+        z-index: 1;
+      }
+      @keyframes glitchTop {
+        0% { transform: translate(0,0);}
+        15% { transform: translate(-3px,-2px);}
+        50% { transform: translate(-1px,2px);}
+        100% { transform: translate(0,1px);}
+      }
+      @keyframes glitchBot {
+        0% { transform: translate(0,0);}
+        20% { transform: translate(2px,1px);}
+        55% { transform: translate(-2px,-1px);}
+        100% { transform: translate(1px,0);}
+      }
+      .animate-blink {
+        animation: blink 1s steps(2, start) infinite;
+      }
+      @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.1; }
+      }
+    </style>
+  </div>
+</BaseLayout>
