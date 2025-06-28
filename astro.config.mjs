@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
+import netlify from "@astrojs/netlify";
 
 import react from '@astrojs/react';
 
@@ -10,6 +11,6 @@ export default defineConfig({
     plugins: [tailwindcss()],
     assetsInclude: ['**/*.txt'],
   },
-
+  adapter: netlify(),
   integrations: [react()]
 });
