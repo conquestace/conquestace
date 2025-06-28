@@ -1,0 +1,92 @@
+---
+/* ─────────────── imports ─────────────── */
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import DocumentApp from '../../components/news/DocumentApp.astro';
+
+/* ─────────── Static Paths Setup ─────────── */
+export async function getStaticPaths() {
+  // Update 'encryptedfiles' to match your collection folder in src/content/
+  const articles = await getCollection('encryptedfiles');
+  return articles.map((article) => ({
+    params: { slug: article.slug.split('/') }, // catch-all array for deep slugs
+  }));
+}
+
+/* ───────────── Slug Normalization ───────────── */
+const rawSlug = Astro.params.slug; // string | string[]
+const slug = Array.isArray(rawSlug) ? rawSlug.join('/') : rawSlug;
+
+/* ────────────── Find Article ────────────── */
+const articles = await getCollection('encryptedfiles');
+const article = articles.find((a) => a.slug === slug);
+
+if (!article) {
+  // You could redirect to a 404 page or show a custom error message
+  throw new Error(`Encrypted file "${slug}" not found.`);
+}
+
+const { Content, headings } = await article.render();
+const {
+  title = 'Something is Wrong',
+  description = 'An anomaly has been detected in the system.',
+  date = '',
+  tags = [],
+} = article.data;
+
+export const prerender = false; // Keeps page server-rendered (needed for editors/live updates)
+---
+
+<BaseLayout {title} {description}>
+  <DocumentApp
+    slug={slug}
+    title={title}
+    description={description}
+    headings={headings}
+    date={date}
+    tags={tags}
+  >
+    <header class="mb-8">
+      <h1 class="glitch text-4xl font-bold text-[var(--color-primary)]">{title}</h1>
+      {description && <p class="italic text-[var(--color-subtle)]">{description}</p>}
+      {date && (
+        <div class="mt-1 text-xs uppercase text-[var(--color-subtle)] tracking-wide">
+          {new Date(date).toLocaleDateString()}
+        </div>
+      )}
+      {tags && tags.length > 0 && (
+        <div class="mt-2 flex flex-wrap gap-2">
+          {tags.map(tag => (
+            <span class="px-2 py-0.5 rounded bg-[var(--color-faint)] text-xs">{tag}</span>
+          ))}
+        </div>
+      )}
+    </header>
+    <article class="prose prose-invert max-w-[65ch]">
+      <Content />   {/* Renders the MDX/Markdown content */}
+    </article>
+  </DocumentApp>
+</BaseLayout>
+
+<style>
+.glitch {
+  position: relative;
+  color: var(--color-primary);
+  /* Simple animated glitch: shake and text shadow */
+  text-shadow:
+    2px 0 red,
+    -2px 0 blue,
+    0 2px green;
+  animation: glitch-skew 30.2s infinite linear alternate-reverse;
+}
+@keyframes glitch-skew {
+  0%   { transform: skew(0deg, 0deg); }
+  10%  { transform: skew(-2deg, -1deg); }
+  20%  { transform: skew(1deg, 2deg); }
+  30%  { transform: skew(0deg, 1deg); }
+  40%  { transform: skew(2deg, 0deg); }
+  50%  { transform: skew(-1deg, 0deg); }
+  60%  { transform: skew(0deg, 0deg); }
+  100% { transform: skew(1deg, -2deg); }
+}
+</style>

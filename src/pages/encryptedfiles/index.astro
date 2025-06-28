@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FileTree from '../../components/news/FileTree.astro';
+
+// Load all cryptic news articles (update if you change collection name)
+const articles = await getCollection('encryptedfiles');
+
+// Build the directory tree for FileTree component
+const root = {};
+for (const doc of articles) {
+  const parts = doc.slug.split('/');
+  let ptr = root;
+  parts.forEach((part, idx) => {
+    ptr[part] ??= {};
+    const currentNode = ptr[part];
+    if (idx === parts.length - 1) {
+      currentNode.__doc = doc;
+    } else {
+      currentNode.__children ??= {};
+      ptr = currentNode.__children;
+    }
+  });
+}
+---
+
+<BaseLayout>
+  <main class="mx-auto max-w-5xl px-4 py-20 text-[var(--color-text)]">
+    <header class="mb-10">
+      <h1 class="glitch text-4xl font-extrabold tracking-tight text-[var(--color-primary)]">
+        Something is Wrong
+      </h1>
+      <p class="mt-2 text-lg italic text-[var(--color-subtle)]">
+        System anomalies, cryptic dispatches, encrypted files
+      </p>
+    </header>
+
+    {articles.length === 0 ? (
+      <p class="italic text-[var(--color-subtle)]">No encrypted files found.</p>
+    ) : (
+      <section aria-label="Encrypted Files Directory">
+        <FileTree nodes={root} />
+      </section>
+    )}
+  </main>
+
+  <style>
+    .glitch {
+      position: relative;
+      color: var(--color-primary);
+      text-shadow:
+        2px 0 #ff1744,
+        -2px 0 #2979ff,
+        0 2px #00e676;
+      animation: glitch-skew 24.2s infinite linear alternate-reverse;
+    }
+    @keyframes glitch-skew {
+      0%   { transform: skew(0deg, 0deg); }
+      10%  { transform: skew(-2deg, -1deg); }
+      20%  { transform: skew(1deg, 2deg); }
+      30%  { transform: skew(0deg, 1deg); }
+      40%  { transform: skew(2deg, 0deg); }
+      50%  { transform: skew(-1deg, 0deg); }
+      60%  { transform: skew(0deg, 0deg); }
+      100% { transform: skew(1deg, -2deg); }
+    }
+  </style>
+</BaseLayout>

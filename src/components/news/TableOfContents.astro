@@ -1,0 +1,16 @@
+---
+interface Props {
+  headings: { text: string; slug: string; depth: number }[];
+}
+const { headings } = Astro.props;
+
+const toc = headings.filter(h => h.depth === 2);
+---
+<nav class="sticky top-20 max-h-[70vh] overflow-auto pr-4">
+  <h2 class="font-semibold text-lg mb-2 text-[var(--color-primary)]">On this page</h2>
+  <ul class="space-y-1 list-disc list-inside text-sm text-[var(--color-text)]">
+    {toc.map(h => (
+      <li><a href={`#${h.slug}`} class="hover:text-[var(--color-hover)]">{h.text}</a></li>
+    ))}
+  </ul>
+</nav>

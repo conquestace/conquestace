@@ -1,0 +1,70 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FileTree from './FileTree.astro';
+
+// Make Node generic to accept any collection type
+export type Node<T = 'encryptedfiles'> = {
+  __doc?: CollectionEntry<T>;
+  __children?: Record<string, Node<T>>;
+};
+
+// Get props: nodes, and (optional) level
+const { nodes, level = 0 } = Astro.props as { 
+  nodes: Record<string, Node<'encryptedfiles'>>, 
+  level?: number 
+};
+---
+
+<ul class="ml-3 space-y-1 pl-3">
+  {Object.entries(nodes)
+    .filter(([_, data]) => data.__doc || (data.__children && Object.keys(data.__children).length > 0)) // Hide empty folders
+    .sort(([aKey, aData], [bKey, bData]) => {
+      // Folders first, then files, both alphabetically
+      const aIsFile = !!aData.__doc;
+      const bIsFile = !!bData.__doc;
+      if (aIsFile !== bIsFile) return aIsFile ? 1 : -1;
+      return aKey.localeCompare(bKey);
+    })
+    .map(([segment, data]) => {
+      const isFile = !!data.__doc;
+      const children = data.__children;
+
+      if (isFile && data.__doc) {
+        return (
+          <li class="list-none">
+            <div class="pt-1">
+              <a
+                href={`/encryptedfiles/${data.__doc.slug}`}
+                class="font-mono font-medium hover:text-[var(--color-accent)] transition"
+                title={data.__doc.data.title || data.__doc.slug}
+              >
+                📄 {data.__doc.data.title || data.__doc.slug.split('/').pop()}
+              </a>
+              {data.__doc.data.date && (
+                <span class="ml-2 text-xs text-[var(--color-subtle)]">
+                  {new Date(data.__doc.data.date).toLocaleDateString()}
+                </span>
+              )}
+              {data.__doc.data.description && (
+                <p class="mt-0.5 text-xs text-[var(--color-subtle)] italic">
+                  {data.__doc.data.description}
+                </p>
+              )}
+            </div>
+          </li>
+        );
+      }
+
+      // Only open first-level folders by default
+      return (
+        <li class="list-none">
+          <details open={level === 0}>
+            <summary class="cursor-pointer select-none font-semibold text-[var(--color-primary)]">
+              📁 {segment}
+            </summary>
+            {children && <FileTree nodes={children} level={level + 1} />}
+          </details>
+        </li>
+      );
+    })}
+</ul>
