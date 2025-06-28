@@ -4,18 +4,10 @@ directory = "netlify/functions"
 [[headers]]
   for = "/*"
   [headers.values]
-
-    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
-    #add_header Content-Security-Policy "default-src 'self'; script-src 'self'; object-src 'none'" always;
-    add_header Content-Security-Policy-Report-Only "default-src 'self'; report-uri /csp-report-endpoint;";
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Permissions-Policy "geolocation=(), microphone=(), camera=()" always;
-
-
-
-
-
-
-
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    # Content-Security-Policy = "default-src 'self'; script-src 'self'; object-src 'none'"
+    Content-Security-Policy-Report-Only = "default-src 'self'; report-uri /csp-report-endpoint;"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer-when-downgrade"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
