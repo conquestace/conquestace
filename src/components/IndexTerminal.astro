@@ -32,16 +32,17 @@
       },
       apps: {
         'wildcarder.py': 'https://conquestace.com/wildcarder',
-        'newtab':        'https://conquestace.com/newtab'
+        'newtab':        'https://conquestace.com/newtab',
       },
 
+      
 
       // ⬇️  new Markdown docs
       'privacy.md'       : '/privacy.md',
       //'terms.md'       : '/terms.md',   // if you split them later
       'PROJECT_README.md': 'https://github.com/conquestace/conquestace/blob/main/website_README.md',
-
-      secrets: null
+      secrets: null,
+      encryptedfiles: null,
     };
 
     /* ── 2. Runtime state & helpers ── */
@@ -103,7 +104,11 @@
 
       const dir = cwd();
       if (dir && dir.hasOwnProperty(arg) && typeof dir[arg] !== 'string') {
-        if (arg === 'secrets') logSys('Permission denied. [secrets] is classified.');
+        if (arg === 'secrets') {
+          logSys('Permission denied. [secrets] is classified.'); }
+        else if (arg === 'encryptedfiles') {
+          window.location.href = '/encryptedfiles';
+        }
         else { pathStack.push(arg); listDir(); }
       } else {
         logSys(`cd: ${arg}: No such directory`);
